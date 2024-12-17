@@ -1,0 +1,102 @@
+import Phaser from "phaser";
+import Stats from "stats.js";
+import { Howl } from "howler";
+import MyEmitter from "./MyEmitter";
+import { SceneHandler } from "./SceneHandler";
+
+type globalDataType = {
+    resources: {[key: string]: Phaser.Textures.Texture},
+    emitter: MyEmitter | undefined,
+    fpsStats: Stats,
+    soundResources: {[key: string]: Howl & {userVolume?: number}}
+    SceneHandler: SceneHandler | undefined,
+    Socket: any
+    PhaserInstance : Phaser.Game | undefined,
+    masetrVolume: number
+}
+export const Globals: globalDataType = {
+    emitter: undefined,
+    resources: {},
+    SceneHandler: undefined,
+    fpsStats: new Stats(),
+    Socket: undefined,
+    soundResources: {},
+    PhaserInstance: undefined,
+    masetrVolume: 1
+}
+
+interface SymbolType{
+    ID: number,
+    Name: string,
+    multiplier: [number, number][],
+    defaultAmount: object,
+    symbolsCount: object
+    description: string
+}
+
+export const currentGameData = {
+    currentBetIndex: 0,
+    won: 0,
+    currentBalance: 0,
+    currentLines: 0,
+    AutoPlay: 0,
+    isMoving: false,
+    soundMode: true,
+    musicMode: true
+}
+
+export const initData = {
+    gameData: {
+        Reel: [[]],
+        BonusData: [],
+        Bets: [],
+        Lines: [[]],
+        autoSpin: [],
+        LinesCount: []
+    },
+    playerData:{
+        Balance: 0,
+        haveWon: 0,
+        currentWinning: 0,
+        currentBet: 0
+    },
+    UIData:{
+        symbols:[
+            {
+                ID: 0,
+                Name: "0",
+                multiplier: [[5, 0], [4, 0], [2, 0]],
+                defaultAmount: {},
+                symbolsCount: {},  // Replace with actual data
+              },
+            {
+                ID: 1,
+                Name: "1",
+                multiplier: [[5,0], [4, 0], [3,0]],
+                defaultAmount: {},
+                symbolsCount: {}
+            }
+        ] as SymbolType[],
+        spclSymbolTxt: []
+    }
+}
+
+export const ResultData = {
+    gameData:{
+        ResultReel: [[]],
+        winAmount: 0,
+        linesToEmit:[],
+        symbolstoToEmit : [], 
+        isBonus: false,
+        freeSpins :{
+            count: 0,
+            isNewAdded: false,
+        }
+    },
+    playerData:{
+        Balance: 0,
+        haveWon: 0,
+        currentWinning: 0,
+        currentBet: 0,
+    }
+}
