@@ -42,7 +42,8 @@ export const currentGameData = {
     AutoPlay: 0,
     isMoving: false,
     soundMode: true,
-    musicMode: true
+    musicMode: true,
+    speakerVolume: true,
 }
 
 export const initData = {
@@ -100,3 +101,18 @@ export const ResultData = {
         currentBet: 0,
     }
 }
+
+export const TextStyle = {
+    dropShadow: true,
+    dropShadowAngle: 1.8,
+    dropShadowColor: "#ffffff",
+    dropShadowDistance: 1,
+    fill: "#ffffff",
+    fillGradientStops: [0.4],
+    fontSize: 32,
+    fontWeight: "bolder",
+    lineJoin: "round",
+    miterLimit: 0,
+    stroke: "#4f3130",
+    strokeThickness: 1.5,
+  };

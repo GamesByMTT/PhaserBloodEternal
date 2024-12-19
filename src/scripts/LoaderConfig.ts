@@ -90,7 +90,16 @@ export const LoaderConfig = {
     circleBg: "src/sprites/circleBg.png",
     minusButton: "src/sprites/minusButton.png",
     plusButton: "src/sprites/plusButton.png",
-
+    blueCircle: "src/sprites/blueCircle.png",
+    redCircle: "src/sprites/redCircle.png",
+    greyCircle: "src/sprites/greyCircle.png",
+    infoIcon: "src/sprites/infoIcon.png",
+    soundOn: "src/sprites/soundOn.png",
+    soundOff: "src/sprites/soundOff.png",
+    settingButton: "src/sprites/settingButton.png",
+    popupBgSprite: "src/sprites/popupBg.png",
+    closeButton: "src/sprites/closeButton.png",
+    headingBg: "src/sprites/headingBg.png",
 }
 
 export const LoaderSoundConfig: any = {

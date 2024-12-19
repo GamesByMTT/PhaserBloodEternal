@@ -55,8 +55,8 @@ export default class MainLoader extends Scene {
     private setupFontLoader() {
         WebFont.load({
             custom: {
-                families: ['Sava'],
-                urls: ['src/fonts/Sava-Pro-Semibold.otf']
+                families: ['Deutsch', 'CinzelDecorative'],
+                urls: ['src/fonts/Deutsch.ttf', 'src/fonts/CinzelDecorative-Regular.ttf']
             },
             active: () => {
                 // Fonts have loaded

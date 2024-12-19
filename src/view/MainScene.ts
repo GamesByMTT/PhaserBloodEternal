@@ -1,6 +1,7 @@
 import { Scene, GameObjects, Scale, } from "phaser";
 import { Globals, ResultData, currentGameData, initData } from "../scripts/Globals";
 import UiContainer from "../scripts/UiContainer";
+import { PopupManager } from "../scripts/PopupManager";
 
 export default class MainScene extends Scene {
     Background!: GameObjects.Sprite
@@ -14,10 +15,12 @@ export default class MainScene extends Scene {
     reelBg!: GameObjects.Sprite
     UIContainer!: UiContainer
     private mainContainer!: Phaser.GameObjects.Container
+    popupManager!: PopupManager
     constructor() {
         super({key: 'MainScene'})
     }
     create(){
+        this.popupManager = new PopupManager(this)
         const {width, height} = this.cameras.main;
         this.mainContainer = this.add.container()
         this.Background = new Phaser.GameObjects.Sprite(this, width/2, height/2, "Background");
@@ -47,6 +50,14 @@ export default class MainScene extends Scene {
         this.candleFour.play("flame")
         this.candleFive.play("flame")
         this.UIContainer = new UiContainer(this)
+        
         this.mainContainer.add([this.Background, this.candles, this.logo,this.reelBg, this.candleOne, this.candleTwo, this.candleThree, this.candleFour, this.candleFive,  this.UIContainer]);
     }
+
+    shutdown() {
+        if (this.popupManager) {
+            this.popupManager.destroy();
+        }
+    }
+    
 }

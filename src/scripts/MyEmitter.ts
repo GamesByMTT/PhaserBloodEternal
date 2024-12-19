@@ -10,4 +10,5 @@ export default class MyEmitter {
             Globals.SceneHandler?.recievedMessage(msgType, msgParams)
         }
     }
+    
 }
