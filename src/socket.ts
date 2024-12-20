@@ -1,5 +1,6 @@
 import { io } from "socket.io-client";
 import { Globals, ResultData, initData } from "./scripts/Globals";
+import { PopupManager } from "./scripts/PopupManager";
 
 
 export class SocketManager  {

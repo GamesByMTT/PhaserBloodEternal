@@ -44,6 +44,7 @@ export const currentGameData = {
     soundMode: true,
     musicMode: true,
     speakerVolume: true,
+    turboMode: false
 }
 
 export const initData = {

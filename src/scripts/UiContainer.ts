@@ -4,6 +4,7 @@ import { Scene, GameObjects } from "phaser";
 import { gameConfig } from "./appConfig";
 import { PopupManager } from "./PopupManager";
 import SoundManager from "./SoundManager";
+import { TextLabel } from "./TextLabel";
 
 export default class UiContainer extends GameObjects.Container {
 
@@ -20,6 +21,12 @@ export default class UiContainer extends GameObjects.Container {
     settingButton!: InteractiveBtn
     speakerButton!: GameObjects.Sprite
     private popupManager: PopupManager
+    currentBet!: TextLabel
+    totalBetAmount!: TextLabel
+    currentWin!: TextLabel
+    currentBalance!: TextLabel
+    totalLine!: TextLabel
+    spinText!: TextLabel
 
     constructor(scene: Scene){
         super(scene);
@@ -36,6 +43,8 @@ export default class UiContainer extends GameObjects.Container {
         this.settingUI();
         this.soundUI();
         this.infoiconUI();
+        this.logout();
+        this.bottomPanel()
     }
     //Bet Panel with plus and minus Buttton 
     betPerLineUI(){
@@ -59,8 +68,9 @@ export default class UiContainer extends GameObjects.Container {
 
         }, 1, true)
         this.betMinus.setPosition(-80, 0).setScale(0.4)
+        this.currentBet = new TextLabel(this.scene, 0, -20, initData.gameData.Bets[currentGameData.currentBetIndex], 30, "#ffffff").setOrigin(0.5)
         const betPerLineText = this.scene.add.text(0, 20, "Bet/Lines", { fontFamily: "Deutsch", fontSize: "25px", color: "#fff" }).setOrigin(0.5)
-        container.add([betPanel, plusCircle, minusCircle, betPerLineText, this.betPlus, this.betMinus])
+        container.add([betPanel, plusCircle, minusCircle, this.currentBet, betPerLineText, this.betPlus, this.betMinus])
 
     }
     //Total Bet UI with plus and minus button
@@ -85,8 +95,9 @@ export default class UiContainer extends GameObjects.Container {
 
         }, 3, true)
         this.totalBetMinus.setPosition(-80, 0).setScale(0.4)
+        this.totalBetAmount = new TextLabel(this.scene, 0, -20, (initData.gameData.Bets[currentGameData.currentBetIndex] * initData.gameData.Lines.length).toString(), 30, "#ffffff").setOrigin(0.5)
         const totalBetText = this.scene.add.text(0, 20, "Total Bet", { fontFamily: "Deutsch", fontSize: "25px", color: "#fff" }).setOrigin(0.5)
-        container.add([totalBetPanel, plusCircle, minusCircle, totalBetText, this.totalBetPlus, this.totalBetMinus])
+        container.add([totalBetPanel, plusCircle, minusCircle, this.totalBetAmount, totalBetText, this.totalBetPlus, this.totalBetMinus])
     }
     //Win UI with win amount
     winUI(){
@@ -94,8 +105,8 @@ export default class UiContainer extends GameObjects.Container {
         const winPanel = this.scene.add.sprite(0, -5, "winPanel").setScale(0.95);
 
         const winText = this.scene.add.text(0, 20, "Win", { fontFamily: "Deutsch", fontSize: "27px", color: "#fff" }).setOrigin(0.5)
-
-        container.add([winPanel, winText])
+        this.currentWin = new TextLabel(this.scene, 0, -25, ResultData.playerData.currentWinning, 30, "#ffffff").setOrigin(0.5)
+        container.add([winPanel, this.currentWin, winText])
 
     }
     //Max Bet Button to increase maximum bet
@@ -243,6 +254,35 @@ export default class UiContainer extends GameObjects.Container {
         container.add([outerCircle, this.infoIconButton])
 
     }
+
+    bottomPanel(){
+        const container = this.scene.add.container(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.85)
+        const spritePanel = this.scene.add.sprite(0, 0, "borderBottom").setScale(1.1)
+        console.log(ResultData.playerData.Balance, "ResultData.playerData.Balance");
+        const balanceText = this.scene.add.text(gameConfig.scale.width * 0.2, gameConfig.scale.height * 0.84, "Balance", {fontFamily: "Deutsch", fontSize: "30px", color: "#ffffff"})
+        this.currentBalance = new TextLabel(this.scene, gameConfig.scale.width * 0.31, gameConfig.scale.height * 0.855, ResultData.playerData.Balance.toFixed(2), 35, "#ffffff", "Deutsch")
+        this.spinText = new TextLabel(this.scene, gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.855, "Press Spin To Play", 35, "#ffffff", "CinzelDecorative")
+        const lineText = this.scene.add.text(gameConfig.scale.width * 0.68, gameConfig.scale.height * 0.84, "Lines", {fontFamily: "Deutsch", fontSize: "35px", color: "#ffffff"})
+        this.totalLine = new TextLabel(this.scene, gameConfig.scale.width * 0.8, gameConfig.scale.height * 0.855, initData.gameData.Lines.length, 35, "#ffffff", "Deutsch")
+        container.add([spritePanel])
+
+        // this.add(this.currentBalance)
+    }
+
+    logout(){
+        const conatiner = this.scene.add.container(gameConfig.scale.width * 0.92, gameConfig.scale.height * 0.17)
+        const outerCircle = this.scene.add.sprite(0, 0, "circleBg").setScale(0.45)
+        const logoutButton = this.scene.add.sprite(0, 0, "closeButton").setScale(0.43).setInteractive()
+        logoutButton.on("pointerdown",()=>{
+            logoutButton.setScale(0.4)
+            this.popupManager.showLogoutPopup({})
+        })
+        logoutButton.on("pointerup", ()=>{
+            logoutButton.setScale(0.43)
+        })
+
+        conatiner.add([outerCircle, logoutButton])
+    }
 }
 
 class InteractiveBtn extends Phaser.GameObjects.Sprite {
@@ -267,7 +307,7 @@ class InteractiveBtn extends Phaser.GameObjects.Sprite {
             }else if(textures[0].key == "greyCircle"){
                 this.setScale(0.6)
             }else if(textures[0].key == "settingButton"){
-                this.setScale(0.6)
+                this.setScale(0.7)
             }else{
                 this.setScale(0.35)
             }
@@ -283,18 +323,44 @@ class InteractiveBtn extends Phaser.GameObjects.Sprite {
                 this.setScale(0.9)
             }else if(textures[0].key == "greyCircle"){
                 this.setScale(0.7)
-            }
-            else if(textures[0].key == "settingButton"){
+            }else if(textures[0].key == "settingButton"){
                 this.setScale(0.7)
             }
             else{
                 this.setScale(0.4)
             }
         });
+        this.on('pointerover', () => {
+            this.setTexture(this.hoverTexture.key)
+            if(textures[0].key == "redCircle"){
+                this.setScale(0.75)
+            }else if(textures[0].key == "blueCircle"){
+                this.setScale(0.75)
+            }else if(textures[0].key == "greyCircle"){
+                this.setScale(0.65)
+            }else if(textures[0].key == "settingButton"){
+                this.setScale(0.65)
+            }else{
+                this.setScale(0.35)
+            }
+        })
         this.on('pointerout', () => {
-            
             this.setTexture(this.defaultTexture.key)
+            this.setTexture(this.defaultTexture.key)
+            if(textures[0].key == "redCircle"){
+                this.setScale(0.78)
+            }else if(textures[0].key == "blueCircle"){
+                this.setScale(0.9)
+            }else if(textures[0].key == "greyCircle"){
+                this.setScale(0.7)
+            }else if(textures[0].key == "settingButton"){
+                this.setScale(0.7)
+            }
+            else{
+                this.setScale(0.4)
+            }
         });
+       
         // Set up animations if necessary
         this.anims.create({
             key: 'hover',

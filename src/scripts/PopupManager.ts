@@ -1,13 +1,15 @@
 import { Scene } from "phaser";
 import InfoPopup from "./popups/InfoPopup";
 import SettingPopup from "./popups/SettingPopup";
+import LogoutPopup from "./popups/LogoutPopup";
+import Disconnection from "./popups/Disconnection";
 
 export class PopupManager {
     private scene: Scene;
     private popupContainer: Phaser.GameObjects.Container;
     private overlay: Phaser.GameObjects.Rectangle;
-    private currentPopup: InfoPopup | SettingPopup | null = null;
-
+    private currentPopup: InfoPopup | SettingPopup | LogoutPopup | Disconnection | null = null;
+     
     constructor(scene: Scene) {
         this.scene = scene;
         
@@ -19,6 +21,11 @@ export class PopupManager {
         this.overlay = scene.add.rectangle(0, 0, scene.scale.width,  scene.scale.height, 0x000000, 0.7);
         this.overlay.setOrigin(0);
         this.overlay.setInteractive();
+
+        //close all popup if click anywhere on the screen
+        // this.overlay.on("pointerdown",()=>{
+        //     scene.events.emit("closePopup")
+        // })
         this.popupContainer.add(this.overlay);
         // Initially hide the container
         this.popupContainer.setVisible(false);
@@ -37,6 +44,20 @@ export class PopupManager {
         this.currentPopup = new SettingPopup(this.scene, data);
         this.popupContainer.add(this.currentPopup);
         this.popupContainer.setVisible(true);
+    }
+
+    showDisconnectionPopup(data: any){
+        this.closeCurrentPopup();
+        this.currentPopup = new Disconnection(this.scene, data);
+        this.popupContainer.add(this.currentPopup);
+        this.popupContainer.setVisible(true);
+    }
+
+    showLogoutPopup(data:any){
+        this.closeCurrentPopup();
+        this.currentPopup = new LogoutPopup(this.scene, data);
+        this.popupContainer.add(this.currentPopup);
+        this.popupContainer.setVisible(true)
     }
 
     closeCurrentPopup() {

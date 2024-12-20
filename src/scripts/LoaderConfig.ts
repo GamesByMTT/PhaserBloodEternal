@@ -100,6 +100,11 @@ export const LoaderConfig = {
     popupBgSprite: "src/sprites/popupBg.png",
     closeButton: "src/sprites/closeButton.png",
     headingBg: "src/sprites/headingBg.png",
+    nextButton: "src/sprites/nextButton.png",
+    previousButton: "src/sprites/previousButton.png",
+    returnToGame: "src/sprites/returnToGame.png",
+    blankCircle: "src/sprites/blankCircle.png",
+    borderBottom: "src/sprites/bottomBorder.png"
 }
 
 export const LoaderSoundConfig: any = {
