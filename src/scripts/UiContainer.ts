@@ -260,10 +260,10 @@ export default class UiContainer extends GameObjects.Container {
         const spritePanel = this.scene.add.sprite(0, 0, "borderBottom").setScale(1.1)
         console.log(ResultData.playerData.Balance, "ResultData.playerData.Balance");
         const balanceText = this.scene.add.text(gameConfig.scale.width * 0.2, gameConfig.scale.height * 0.84, "Balance", {fontFamily: "Deutsch", fontSize: "30px", color: "#ffffff"})
-        this.currentBalance = new TextLabel(this.scene, gameConfig.scale.width * 0.31, gameConfig.scale.height * 0.855, ResultData.playerData.Balance.toFixed(2), 35, "#ffffff", "Deutsch")
+        this.currentBalance = new TextLabel(this.scene, gameConfig.scale.width * 0.31, gameConfig.scale.height * 0.86, ResultData.playerData.Balance.toFixed(2), 35, "#ffffff", "Deutsch")
         this.spinText = new TextLabel(this.scene, gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.855, "Press Spin To Play", 35, "#ffffff", "CinzelDecorative")
         const lineText = this.scene.add.text(gameConfig.scale.width * 0.68, gameConfig.scale.height * 0.84, "Lines", {fontFamily: "Deutsch", fontSize: "35px", color: "#ffffff"})
-        this.totalLine = new TextLabel(this.scene, gameConfig.scale.width * 0.8, gameConfig.scale.height * 0.855, initData.gameData.Lines.length, 35, "#ffffff", "Deutsch")
+        this.totalLine = new TextLabel(this.scene, gameConfig.scale.width * 0.8, gameConfig.scale.height * 0.86, initData.gameData.Lines.length, 35, "#ffffff", "Deutsch")
         container.add([spritePanel])
 
         // this.add(this.currentBalance)
