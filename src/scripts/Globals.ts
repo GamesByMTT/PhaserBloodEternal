@@ -86,6 +86,7 @@ export const initData = {
 export const ResultData = {
     gameData:{
         ResultReel: [[]],
+        batPayout: [],
         winAmount: 0,
         linesToEmit:[],
         symbolstoToEmit : [], 

@@ -144,14 +144,17 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("redCircle")
         ]
         this.spinButton = new InteractiveBtn(this.scene, spinTexture, ()=>{
-
+            console.log("button click");
+            
+            Globals.Socket?.sendMessage("SPIN", { currentBet: currentGameData.currentBetIndex, currentLines: initData.gameData.Lines.length, spins: 1 });
         }, 5, true)
-        this.spinButton.on("pointerdown", ()=>{
-            spinText.setScale(0.8)
-        })
-        this.spinButton.on("pointerup", ()=>{
-            spinText.setScale(1);
-        })
+        // this.spinButton.on("pointerdown", ()=>{
+        //     spinText.setScale(0.8)
+           
+        // })
+        // this.spinButton.on("pointerup", ()=>{
+        //     spinText.setScale(1);
+        // })
         // this.spinButton.setPosition()
         this.spinButton.setScale(0.75)
         container.add([redCircle, this.spinButton, spinText])

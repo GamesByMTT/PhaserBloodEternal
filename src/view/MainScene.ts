@@ -26,6 +26,7 @@ export default class MainScene extends Scene {
     }
     create(){
         this.popupManager = new PopupManager(this)
+        this.soundManager = new SoundManager(this)
         const {width, height} = this.cameras.main;
         this.mainContainer = this.add.container()
         this.Background = new Phaser.GameObjects.Sprite(this, width/2, height/2, "Background");
@@ -58,7 +59,7 @@ export default class MainScene extends Scene {
         
         this.mainContainer.add([this.Background, this.candles, this.logo,this.reelBg, this.candleOne, this.candleTwo, this.candleThree, this.candleFour, this.candleFive,  this.UIContainer]);
         
-        this.slots = new Slots(this, this.uiContainer, ()=> this.onSpinCallBack())
+        this.slots = new Slots(this, this.uiContainer, ()=> this.onSpinCallBack(), this.soundManager)
         this.mainContainer.add(this.slots)
     }
     onSpinCallBack(){

@@ -63,7 +63,7 @@ setupSocket(){
                         ResultData.gameData = data.message.GameData;
                         ResultData.playerData = data.message.PlayerData;
                         Globals.emitter?.Call("ResultData");
-                        console.log(ResultData.gameData, "ResultData") 
+                        console.error(ResultData.gameData, "ResultData") 
                     }
                 })
             })
