@@ -78,7 +78,7 @@ export const LoaderConfig = {
     slots8_0: "src/sprites/Symbols/slots8.png",
     slots9_0: "src/sprites/Symbols/slots9.png",
     slots10_0: "src/sprites/Symbols/slots10.png",
-    slots11_0: "src/spires/Symbols/slots11.png",
+    slots11_0: "src/sprites/Symbols/slots11.png",
     slots12_0: "src/sprites/Symbols/slots12.png",
     slots13_0: "src/sprites/Symbols/slots13.png",
     slots14_0: "src/sprites/Symbols/slots14.png",
@@ -104,11 +104,26 @@ export const LoaderConfig = {
     previousButton: "src/sprites/previousButton.png",
     returnToGame: "src/sprites/returnToGame.png",
     blankCircle: "src/sprites/blankCircle.png",
-    borderBottom: "src/sprites/bottomBorder.png"
+    borderBottom: "src/sprites/bottomBorder.png",
+
+    winRing0: "src/sprites/WinRing1.png",
+    winRing1: "src/sprites/WinRing2.png",
+    winRing2: "src/sprites/WinRing3.png",
+    winRing3: "src/sprites/WinRing4.png",
+    winRing4: "src/sprites/WinRing5.png",
+    winRing5: "src/sprites/WinRing6.png",
+    winRing6: "src/sprites/WinRing7.png",
+    winRing7: "src/sprites/WinRing8.png",
+    winRing8: "src/sprites/WinRing9.png",
+    winRing9: "src/sprites/WinRing10.png",
+    winRing10: "src/sprites/WinRing11.png",
+    winRing11: "src/sprites/WinRing12.png",
+    winRing12: "src/sprites/WinRing13.png",
+    winRing13: "src/sprites/WinRing14.png",
 }
 
 export const LoaderSoundConfig: any = {
-    backgroundMusic : "src/sounds.Teaser.wav",
+    // backgroundMusic : "src/sounds.Teaser.wav",
     onSpin :  "/src/sounds/slot-machine-loop.wav",
     spinButton: "src/sounds/spin.wav",
     winMusic: "src/sounds/win_sound.wav",

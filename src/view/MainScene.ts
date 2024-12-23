@@ -55,23 +55,45 @@ export default class MainScene extends Scene {
         this.candleThree.play("flame")
         this.candleFour.play("flame")
         this.candleFive.play("flame")
-        this.UIContainer = new UiContainer(this)
+        this.UIContainer = new UiContainer(this, () => this.onSpinCallBack())
         
         this.mainContainer.add([this.Background, this.candles, this.logo,this.reelBg, this.candleOne, this.candleTwo, this.candleThree, this.candleFour, this.candleFive,  this.UIContainer]);
         
-        this.slots = new Slots(this, this.uiContainer, ()=> this.onSpinCallBack(), this.soundManager)
+        this.slots = new Slots(this, this.uiContainer, ()=> this.onResultCallBack(), this.soundManager)
         this.mainContainer.add(this.slots)
     }
     onSpinCallBack(){
         const onSpinMusic = "onSpin"
         this.soundManager.playSound(onSpinMusic)
-        // this.slot.moveReel();
+        this.slots.moveReel();
         // this.lineGenerator.hideLines();
     }
+    onResultCallBack(){
+        const onSpinMusic = "onSpin"
+        // this.uiContainer.onSpin(false);
+        // this.soundManager.stopSound(onSpinMusic)
+        // this.lineGenerator.showLines(ResultData.gameData.linesToEmit);
+    }
+
+
 
     shutdown() {
         if (this.popupManager) {
             this.popupManager.destroy();
+        }
+    }
+
+    /**
+     * @method recievedMessage called from MyEmitter
+     * @param msgType ResultData
+     * @param msgParams any
+     * @description this method is used to update the value of textlabels like Balance, winAmount freeSpin which we are reciving after every spin
+     */
+    recievedMessage(msgType: string, msgParams: any) {
+        if(msgType == "ResultData"){
+            setTimeout(() => {
+                this.slots.stopTween();
+            }, 1000);
         }
     }
     

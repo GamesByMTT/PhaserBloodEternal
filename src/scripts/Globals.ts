@@ -89,7 +89,7 @@ export const ResultData = {
         batPayout: [],
         winAmount: 0,
         linesToEmit:[],
-        symbolstoToEmit : [], 
+        symbolsToEmit : [], 
         isBonus: false,
         freeSpins :{
             count: 0,

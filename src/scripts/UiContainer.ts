@@ -27,8 +27,9 @@ export default class UiContainer extends GameObjects.Container {
     currentBalance!: TextLabel
     totalLine!: TextLabel
     spinText!: TextLabel
+    private isSpinning: boolean = false;
 
-    constructor(scene: Scene){
+    constructor(scene: Scene, spinCallBack: () => void,){
         super(scene);
         this.popupManager = new PopupManager(scene)
         scene.add.existing(this)
@@ -37,7 +38,7 @@ export default class UiContainer extends GameObjects.Container {
         this.totalBetUI();
         this.winUI();
         this.maxBetUI();
-        this.spinUI();
+        this.spinUI(spinCallBack);
         this.doubleupUI();
         this.autoPlayUI();
         this.settingUI();
@@ -135,7 +136,7 @@ export default class UiContainer extends GameObjects.Container {
         container.add([buttongBg, this.maxbetButton, maxbetText])
     }
     //Spin button
-    spinUI(){
+    spinUI(spinCallBack: () => void){
         const container = this.scene.add.container(gameConfig.scale.width * 0.67, gameConfig.scale.height * 0.94)
         const redCircle = this.scene.add.sprite(0, 0, "circleBg").setScale(0.78)
         const spinText = this.scene.add.text(0, 0, "Spin",{fontFamily: "Deutsch", fontSize: "35px", color:"#ffffff",}).setOrigin(0.5)
@@ -145,8 +146,21 @@ export default class UiContainer extends GameObjects.Container {
         ]
         this.spinButton = new InteractiveBtn(this.scene, spinTexture, ()=>{
             console.log("button click");
+
+            if (this.isSpinning) return;
+    
+            this.isSpinning = true;
+            Globals.Socket?.sendMessage("SPIN", { 
+                currentBet: currentGameData.currentBetIndex, 
+                currentLines: initData.gameData.Lines.length, 
+                spins: 1 
+            });
+            spinCallBack();
             
-            Globals.Socket?.sendMessage("SPIN", { currentBet: currentGameData.currentBetIndex, currentLines: initData.gameData.Lines.length, spins: 1 });
+            // Reset the flag after some time or when spin completes
+            setTimeout(() => {
+                this.isSpinning = false;
+            }, 1200); // Adjust timeout as needed
         }, 5, true)
         // this.spinButton.on("pointerdown", ()=>{
         //     spinText.setScale(0.8)
