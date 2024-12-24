@@ -8,7 +8,6 @@ import SoundManager from "../scripts/SoundManager";
 export default class MainScene extends Scene {
     Background!: GameObjects.Sprite
     slots!: Slots
-    uiContainer!: UiContainer
     soundManager!: SoundManager
     candles!: GameObjects.Sprite
     logo!: GameObjects.Sprite
@@ -18,7 +17,7 @@ export default class MainScene extends Scene {
     candleFour!: GameObjects.Sprite
     candleFive!: GameObjects.Sprite
     reelBg!: GameObjects.Sprite
-    UIContainer!: UiContainer
+    uiContainer!: UiContainer
     private mainContainer!: Phaser.GameObjects.Container
     popupManager!: PopupManager
     constructor() {
@@ -55,9 +54,9 @@ export default class MainScene extends Scene {
         this.candleThree.play("flame")
         this.candleFour.play("flame")
         this.candleFive.play("flame")
-        this.UIContainer = new UiContainer(this, () => this.onSpinCallBack())
+        this.uiContainer = new UiContainer(this, () => this.onSpinCallBack(), this.soundManager)
         
-        this.mainContainer.add([this.Background, this.candles, this.logo,this.reelBg, this.candleOne, this.candleTwo, this.candleThree, this.candleFour, this.candleFive,  this.UIContainer]);
+        this.mainContainer.add([this.Background, this.candles, this.logo,this.reelBg, this.candleOne, this.candleTwo, this.candleThree, this.candleFour, this.candleFive,  this.uiContainer]);
         
         this.slots = new Slots(this, this.uiContainer, ()=> this.onResultCallBack(), this.soundManager)
         this.mainContainer.add(this.slots)
@@ -70,7 +69,7 @@ export default class MainScene extends Scene {
     }
     onResultCallBack(){
         const onSpinMusic = "onSpin"
-        // this.uiContainer.onSpin(false);
+        this.uiContainer.onSpin(false);
         // this.soundManager.stopSound(onSpinMusic)
         // this.lineGenerator.showLines(ResultData.gameData.linesToEmit);
     }
@@ -91,6 +90,7 @@ export default class MainScene extends Scene {
      */
     recievedMessage(msgType: string, msgParams: any) {
         if(msgType == "ResultData"){
+            
             setTimeout(() => {
                 this.slots.stopTween();
             }, 1000);

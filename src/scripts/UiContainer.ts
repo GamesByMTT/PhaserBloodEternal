@@ -27,13 +27,13 @@ export default class UiContainer extends GameObjects.Container {
     currentBalance!: TextLabel
     totalLine!: TextLabel
     spinText!: TextLabel
-    private isSpinning: boolean = false;
+    public isSpinning: boolean = false;
 
-    constructor(scene: Scene, spinCallBack: () => void,){
+    constructor(scene: Scene, spinCallBack: () => void, SoundManager: SoundManager){
         super(scene);
         this.popupManager = new PopupManager(scene)
         scene.add.existing(this)
-
+        this.isSpinning = false
         this.betPerLineUI();
         this.totalBetUI();
         this.winUI();
@@ -46,6 +46,7 @@ export default class UiContainer extends GameObjects.Container {
         this.infoiconUI();
         this.logout();
         this.bottomPanel()
+        this.scene.events.on("updateWin", this.updateData, this)
     }
     //Bet Panel with plus and minus Buttton 
     betPerLineUI(){
@@ -58,7 +59,9 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("plusButton")
         ]
         this.betPlus = new InteractiveBtn(this.scene, plusButton, ()=>{
-
+            if (!this.isSpinning) {
+                this.increaseBet()
+            }
         }, 0, true)
         this.betPlus.setPosition(80, 0).setScale(0.4)
         const minusButton = [
@@ -66,7 +69,7 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("minusButton")
         ]
         this.betMinus = new InteractiveBtn(this.scene, minusButton, ()=>{
-
+            this.decreaseBet()
         }, 1, true)
         this.betMinus.setPosition(-80, 0).setScale(0.4)
         this.currentBet = new TextLabel(this.scene, 0, -20, initData.gameData.Bets[currentGameData.currentBetIndex], 30, "#ffffff").setOrigin(0.5)
@@ -85,7 +88,9 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("plusButton")
         ]
         this.totalBetPlus = new InteractiveBtn(this.scene, plusButton, ()=>{
-
+            if (!this.isSpinning) {
+                this.increaseBet()
+            }
         },2, true)
         this.totalBetPlus.setPosition(80, 0).setScale(0.4)
         const minusButton = [
@@ -93,7 +98,9 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("minusButton")
         ]
         this.totalBetMinus = new InteractiveBtn(this.scene, minusButton, ()=>{
-
+            if (!this.isSpinning) {
+                this.decreaseBet()
+            }
         }, 3, true)
         this.totalBetMinus.setPosition(-80, 0).setScale(0.4)
         this.totalBetAmount = new TextLabel(this.scene, 0, -20, (initData.gameData.Bets[currentGameData.currentBetIndex] * initData.gameData.Lines.length).toString(), 30, "#ffffff").setOrigin(0.5)
@@ -106,7 +113,7 @@ export default class UiContainer extends GameObjects.Container {
         const winPanel = this.scene.add.sprite(0, -5, "winPanel").setScale(0.95);
 
         const winText = this.scene.add.text(0, 20, "Win", { fontFamily: "Deutsch", fontSize: "27px", color: "#fff" }).setOrigin(0.5)
-        this.currentWin = new TextLabel(this.scene, 0, -25, ResultData.playerData.currentWinning, 30, "#ffffff").setOrigin(0.5)
+        this.currentWin = new TextLabel(this.scene, 0, -25, ResultData.playerData.currentWining, 30, "#ffffff").setOrigin(0.5)
         container.add([winPanel, this.currentWin, winText])
 
     }
@@ -145,31 +152,20 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("redCircle")
         ]
         this.spinButton = new InteractiveBtn(this.scene, spinTexture, ()=>{
-            console.log("button click");
-
             if (this.isSpinning) return;
-    
             this.isSpinning = true;
+            this.onSpin(true)
             Globals.Socket?.sendMessage("SPIN", { 
                 currentBet: currentGameData.currentBetIndex, 
                 currentLines: initData.gameData.Lines.length, 
                 spins: 1 
             });
             spinCallBack();
-            
             // Reset the flag after some time or when spin completes
             setTimeout(() => {
                 this.isSpinning = false;
             }, 1200); // Adjust timeout as needed
         }, 5, true)
-        // this.spinButton.on("pointerdown", ()=>{
-        //     spinText.setScale(0.8)
-           
-        // })
-        // this.spinButton.on("pointerup", ()=>{
-        //     spinText.setScale(1);
-        // })
-        // this.spinButton.setPosition()
         this.spinButton.setScale(0.75)
         container.add([redCircle, this.spinButton, spinText])
     }
@@ -282,7 +278,6 @@ export default class UiContainer extends GameObjects.Container {
         const lineText = this.scene.add.text(gameConfig.scale.width * 0.68, gameConfig.scale.height * 0.84, "Lines", {fontFamily: "Deutsch", fontSize: "35px", color: "#ffffff"})
         this.totalLine = new TextLabel(this.scene, gameConfig.scale.width * 0.8, gameConfig.scale.height * 0.86, initData.gameData.Lines.length, 35, "#ffffff", "Deutsch")
         container.add([spritePanel])
-
         // this.add(this.currentBalance)
     }
 
@@ -299,6 +294,56 @@ export default class UiContainer extends GameObjects.Container {
         })
 
         conatiner.add([outerCircle, logoutButton])
+    }
+    onSpin(spin: boolean){
+        if(spin){
+            this.betPlus.disableInteractive()
+            this.betMinus.disableInteractive()
+            this.spinButton.disableInteractive();
+            this.totalBetPlus.disableInteractive();
+            this.totalBetMinus.disableInteractive();
+            this.maxbetButton.disableInteractive()
+            this.doubleUPButton.disableInteractive();
+            this.infoIconButton.disableInteractive();
+            this.autoPlayButton.disableInteractive();
+            this.settingButton.disableInteractive();
+        }else{
+            this.betPlus.setInteractive()
+            this.betMinus.setInteractive()
+            this.spinButton.setInteractive();
+            this.totalBetPlus.setInteractive();
+            this.totalBetMinus.setInteractive();
+            this.maxbetButton.setInteractive()
+            this.infoIconButton.setInteractive();
+            this.autoPlayButton.setInteractive()
+            this.settingButton.setInteractive();
+        }
+    }
+    increaseBet(){
+        currentGameData.currentBetIndex++;
+        if (currentGameData.currentBetIndex >= initData.gameData.Bets.length) {
+            currentGameData.currentBetIndex = initData.gameData.Bets.length;
+        }
+        const currentBet = initData.gameData.Bets[currentGameData.currentBetIndex];
+        const betAmount = initData.gameData.Bets[currentGameData.currentBetIndex] * initData.gameData.Lines.length
+        this.currentBet.updateLabelText(currentBet)
+        this.totalBetAmount.updateLabelText(betAmount.toString())
+
+    }
+    decreaseBet(){
+        if (!this.isSpinning) {
+            currentGameData.currentBetIndex--;
+            if (currentGameData.currentBetIndex < 0) {
+                currentGameData.currentBetIndex = 0;
+            }
+            const currrentBet = initData.gameData.Bets[currentGameData.currentBetIndex];
+            const betAmount = initData.gameData.Bets[currentGameData.currentBetIndex] * initData.gameData.Lines.length;
+            this.currentBet.updateLabelText(currrentBet);
+            this.totalBetAmount.updateLabelText(betAmount.toString());
+        }
+    }
+    updateData(){
+        this.currentWin.updateLabelText(ResultData.playerData.currentWining.toString())
     }
 }
 

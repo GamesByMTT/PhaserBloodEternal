@@ -59,7 +59,7 @@ export const initData = {
     playerData:{
         Balance: 0,
         haveWon: 0,
-        currentWinning: 0,
+        currentWining: 0,
         currentBet: 0
     },
     UIData:{
@@ -99,7 +99,7 @@ export const ResultData = {
     playerData:{
         Balance: 0,
         haveWon: 0,
-        currentWinning: 0,
+        currentWining: 0,
         currentBet: 0,
     }
 }

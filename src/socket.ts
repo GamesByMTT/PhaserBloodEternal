@@ -13,8 +13,6 @@ export class SocketManager {
    
   }
   onToken(data : {socketUrl : string, authToken : string}){
-    console.log("Ontoken");
-    
     try { 
       this.SocketUrl = data.socketUrl;
       this.authToken = data.authToken;
@@ -68,7 +66,7 @@ export class SocketManager {
             ResultData.gameData = data.message.GameData;
             ResultData.playerData = data.message.PlayerData;
             Globals.emitter?.Call("ResultData");
-            console.log(ResultData.gameData, "ResultData")  
+            console.log(data, "ResultData")  
         }
       });
     });
