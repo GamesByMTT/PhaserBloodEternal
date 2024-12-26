@@ -106,6 +106,9 @@ export const LoaderConfig = {
     blankCircle: "src/sprites/blankCircle.png",
     borderBottom: "src/sprites/bottomBorder.png",
 
+    //Gamble
+    insideGamble: "src/sprites/insideGamble.png",
+
     winRing0: "src/sprites/WinRing1.png",
     winRing1: "src/sprites/WinRing2.png",
     winRing2: "src/sprites/WinRing3.png",
@@ -120,6 +123,34 @@ export const LoaderConfig = {
     winRing11: "src/sprites/WinRing12.png",
     winRing12: "src/sprites/WinRing13.png",
     winRing13: "src/sprites/WinRing14.png",
+
+    RedSmoke0: "src/sprites/RedSmoke2.png",
+    RedSmoke1: "src/sprites/RedSmoke3.png",
+    RedSmoke2: "src/sprites/RedSmoke4.png",
+    RedSmoke3: "src/sprites/RedSmoke5.png",
+    RedSmoke4: "src/sprites/RedSmoke6.png",
+    RedSmoke5: "src/sprites/RedSmoke7.png",
+    RedSmoke6: "src/sprites/RedSmoke8.png",
+    RedSmoke7: "src/sprites/RedSmoke9.png",
+    RedSmoke8: "src/sprites/RedSmoke10.png",
+    RedSmoke9: "src/sprites/RedSmoke11.png",
+    RedSmoke10: "src/sprites/RedSmoke12.png",
+    RedSmoke11: "src/sprites/RedSmoke13.png",
+    RedSmoke12: "src/sprites/RedSmoke14.png",
+    RedSmoke13: "src/sprites/RedSmoke15.png",
+    RedSmoke14: "src/sprites/RedSmoke16.png",
+    RedSmoke15: "src/sprites/RedSmoke17.png",
+    RedSmoke16: "src/sprites/RedSmoke18.png",
+    RedSmoke17: "src/sprites/RedSmoke19.png",
+    RedSmoke18: "src/sprites/RedSmoke20.png",
+    RedSmoke19: "src/sprites/RedSmoke21.png",
+    RedSmoke20: "src/sprites/RedSmoke22.png",
+    RedSmoke21: "src/sprites/RedSmoke23.png",
+    RedSmoke22: "src/sprites/RedSmoke24.png",
+    RedSmoke23: "src/sprites/RedSmoke25.png",
+    RedSmoke24: "src/sprites/RedSmoke26.png",
+    RedSmoke25: "src/sprites/RedSmoke27.png",
+    RedSmoke26: "src/sprites/RedSmoke28.png",
 }
 
 export const LoaderSoundConfig: any = {

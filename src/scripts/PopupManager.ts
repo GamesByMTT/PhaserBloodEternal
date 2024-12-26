@@ -3,6 +3,9 @@ import InfoPopup from "./popups/InfoPopup";
 import SettingPopup from "./popups/SettingPopup";
 import LogoutPopup from "./popups/LogoutPopup";
 import Disconnection from "./popups/Disconnection";
+import GamblePopup from "./popups/Gamble";
+
+import { Globals } from "./Globals";
 
 export class PopupManager {
     private scene: Scene;
@@ -30,6 +33,7 @@ export class PopupManager {
         // Initially hide the container
         this.popupContainer.setVisible(false);
         this.scene.events.on('closePopup', this.closeCurrentPopup, this);
+       
     }
 
     showInfoPopup(data: any) {
@@ -57,6 +61,13 @@ export class PopupManager {
         this.closeCurrentPopup();
         this.currentPopup = new LogoutPopup(this.scene, data);
         this.popupContainer.add(this.currentPopup);
+        this.popupContainer.setVisible(true)
+    }
+
+    showGamblePopup(data: any){
+        this.closeCurrentPopup();
+        this.currentPopup = new GamblePopup(this.scene, data);
+        this.popupContainer.add(this.currentPopup)
         this.popupContainer.setVisible(true)
     }
 

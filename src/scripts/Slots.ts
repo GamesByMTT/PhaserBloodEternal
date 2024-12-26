@@ -10,6 +10,7 @@ export default class Slots extends Phaser.GameObjects.Container{
     SoundManager: SoundManager
     resultCallBack: ()=> void;
     slotSymbols: any [][] = []
+    winningFrames: any [] = []
     moveSlots = false;
     private symbolKeys: string[];
     private maskWidth: number;
@@ -22,10 +23,14 @@ export default class Slots extends Phaser.GameObjects.Container{
     private reelContainers: Phaser.GameObjects.Container[]= []
     private reelTween: Phaser.Tweens.Tween[]= []
     private isSpinning: boolean = false;
+    private completedAnimations: number = 0;
+    private totalAnimations: number = 0;
+    private hasEmittedSmoke: boolean = false;
 
     constructor(scene: Phaser.Scene, uiContainer: UiContainer, callback: ()=> void, SoundManager: SoundManager){
         super(scene)
-        
+        // Create containers for smoke and win text that will be above the mask
+
         this.resultCallBack = callback;
         this.SoundManager = SoundManager;
         this.uiContainer = uiContainer;
@@ -53,6 +58,7 @@ export default class Slots extends Phaser.GameObjects.Container{
         const visibleSymbol = 3
         const startIndex = 1
         const totalSymbolsPerReel = 16; 
+               
         const initialYOffset = (totalSymbol - startIndex - visibleSymbol) * this.spacingY;
         for (let i = 0; i < 6; i++) { 
             const reelContainer = new Phaser.GameObjects.Container(this.scene);
@@ -103,20 +109,21 @@ export default class Slots extends Phaser.GameObjects.Container{
         return this.symbolKeys[randomIndex]
     }
     moveReel(){
+        this.completedAnimations = 0;
+        this.hasEmittedSmoke = false;
         // console.log("moveReel Called");
-        const initialYOffset = (this.slotSymbols[0][0].totalSymbol - this.slotSymbols[0][0].visibleSymbol - this.slotSymbols[0][0].startIndex) * this.slotSymbols[0][0].spacingY;
+        const initialYOffset = (this.slotSymbols[0][0].totalSymbol - this.slotSymbols[0][0].visibleSymbol - this.slotSymbols[0][0].startIndex) * this.spacingY;
         setTimeout(() => {
             for (let i = 0; i < this.reelContainers.length; i++) {
-                this.reelContainers[i].setPosition(
-                    this.reelContainers[i].x,
-                    -initialYOffset // Set the reel's position back to the calculated start position
+                this.reelContainers[i].setPosition(this.reelContainers[i].x, -initialYOffset // Set the reel's position back to the calculated start position
                 );
             }    
+        }, 50);
+        setTimeout(() => {
+            for (let i = 0; i < this.reelContainers.length; i++) {
+                this.startReelSpin(i);
+            }
         }, 100);
-        for (let i = 0; i < this.reelContainers.length; i++) {
-            this.startReelSpin(i);
-        }
-
     }
 
     startReelSpin(reelIndex: number) {    
@@ -124,32 +131,45 @@ export default class Slots extends Phaser.GameObjects.Container{
             this.reelTween[reelIndex].stop(); 
         }    
         const reel = this.reelContainers[reelIndex];
-        const spinDistance = this.spacingY * 30;
-        let delayCall = reelIndex * 10
-        // First tween: Acceleration
+        const spinDistance = this.spacingY * 4;
+        let delayCall = reelIndex * 1
+        // const spinDistance = this.spacingY * this.slotSymbols[reelIndex].length; // Use full length of symbols
         //ease Back.easin is used when the reel is moving up
         this.reelTween[reelIndex] = this.scene.tweens.add({
             targets: reel,
             delay: delayCall,
             y: `+=${spinDistance}`,
-            duration: 1000,
+            duration: 200,
             dealy: this.reelContainers[reelIndex],
             ease: 'Back.easeIn',
-            repeat: -1,
-            onComplete: () => {},
+            repeat: 0,
+            onComplete: () => {
+                const spinDistance = this.spacingY * 8;
+                // this.updateReelSymbols(reelIndex)
+                this.reelTween[reelIndex] = this.scene.tweens.add({
+                    targets: reel,
+                    y: `+=${spinDistance}`,
+                    duration: 400,
+                    ease: 'Linear',
+                    repeat: -1,
+                    onComplete:() =>{
+
+                    }
+                })
+            },
         });
     }
 
     stopTween(){        
         for(let i = 0; i < this.reelContainers.length; i++){ 
             const reel = this.reelContainers[i];
-            const reelDelay = 100 * (i + 1);
+            const reelDelay = 100 * i;
             // Calculate target Y (ensure it's a multiple of symbolHeight)
             const targetY = 0;             
             this.scene.tweens.add({
                 targets: reel,
                 y: targetY, // Animate relative to the current position
-                duration: 1000,
+                duration: 600,
                 ease: 'Cubic.easeOut',
                 onComplete: () => {
                     if (this.reelTween[i]) {                        
@@ -171,13 +191,13 @@ export default class Slots extends Phaser.GameObjects.Container{
 
     playWinAnimations() {
         this.resultCallBack();
-
+        this.completedAnimations = 0;
+        this.hasEmittedSmoke = false;
         ResultData.gameData.symbolsToEmit.forEach((rowArray: any) => {
             rowArray.forEach((row: any) => {
                 if (typeof row === "string") {
                     const [y, x]: number[] = row.split(",").map((value) => parseInt(value));
                     const elementId = ResultData.gameData.ResultReel[x][y];
-
                     if (this.slotSymbols[y] && this.slotSymbols[y][x]) {
                         // Add winning animation overlay
                         this.playWinningOverlayAnimation(x, y, elementId); 
@@ -188,32 +208,43 @@ export default class Slots extends Phaser.GameObjects.Container{
         this.scene.events.emit("updateWin")
     }
 
-
     playWinningOverlayAnimation(x: number, y: number, elementId: number) {
-        // Calculate the position for the winning animation
         const winAnimX = this.slotSymbols[y][x].symbol.x;
         const winAnimY = this.slotSymbols[y][x].symbol.y;
-        // Create an array to hold the winning animation frames
-        const winningFrames = [];
-        for (let i = 0; i < 14; i++) { // Assuming you have 50 frames (winning0 to winning49)
-            winningFrames.push({ key: `winRing${i}` });
+        // Create winning ring animation
+        for (let i = 0; i < 14; i++) {
+            this.winningFrames.push({ key: `winRing${i}` });
         }
-        this.scene.anims.create({
-            key: `winningAnim_${elementId}`,
-            frames: winningFrames,
-            frameRate: 15,
-            repeat: -1 
-        });
-        const targetContainer = this.slotSymbols[y][x].symbol.parentContainer; 
-            // Create the winning sprite and add it to the container
-            const winningSprite = this.scene.add.sprite(winAnimX, winAnimY, `winRing0`)
-                .setDepth(12)
-                .setName(`winningSprite_${x}_${y}`);
-            targetContainer.add(winningSprite); // Add to the container
-            this.slotSymbols[y][x].winningSprite = winningSprite; 
-            winningSprite.play(`winningAnim_${elementId}`);
-    }
+        // Create animations
+        if (!this.scene.anims.exists(`winningAnim_${elementId}`)) {
+            this.scene.anims.create({
+                key: `winningAnim_${elementId}`,
+                frames: this.winningFrames,
+                frameRate: 30,
+                repeat: 0
+            });
+        }
     
+        const targetContainer = this.slotSymbols[y][x].symbol.parentContainer;
+        // Create winning sprite on the symbol
+        const winningSprite = this.scene.add.sprite(winAnimX, winAnimY, 'winRing0')
+            .setDepth(12)
+            .setName(`winningSprite_${x}_${y}`);
+            targetContainer.add(winningSprite);
+            this.slotSymbols[y][x].winningSprite = winningSprite;
+            winningSprite.play(`winningAnim_${elementId}`);
+    
+            // When winning animation completes, play smoke animation and start counter
+            winningSprite.on('animationcomplete', () => {
+                winningSprite.setVisible(false);
+                this.completedAnimations++;
+                // this.redSmokeAnimation();
+                if (this.completedAnimations >= this.totalAnimations && !this.hasEmittedSmoke) {
+                    this.hasEmittedSmoke = true;
+                    this.scene.events.emit("redSmokeAnimation");
+                }
+            })
+    }    
 }
 
 class Symbols{
@@ -225,8 +256,6 @@ class Symbols{
     totalSymbol : number = 16;
     visibleSymbol: number = 3;
     startIndex: number = 1;
-    spacingY : number = 20;
-    initialYOffset : number = 0;
     scene: Phaser.Scene;
     reelContainer: Phaser.GameObjects.Container
 

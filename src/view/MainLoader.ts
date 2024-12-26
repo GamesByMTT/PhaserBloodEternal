@@ -33,8 +33,6 @@ export default class MainLoader extends Scene {
     preload() {
         // Load the background 
         window.parent.postMessage("OnEnter", "*")
-        
-        
         this.load.image("BackgroundNewLayer", "src/sprites/bg.png");
 
         this.load.image("logo", "src/sprites/ElDorado.png");

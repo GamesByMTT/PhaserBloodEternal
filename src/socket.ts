@@ -1,6 +1,8 @@
 import { io } from "socket.io-client";
 import { Globals, ResultData, initData, currentGameData } from "./scripts/Globals";
 import MainLoader from "./view/MainLoader";
+import { PopupManager } from "./scripts/PopupManager";
+import { Scene } from "phaser";
 
 // const socketUrl = process.env.SOCKET_URL || ""
 export class SocketManager {
@@ -8,9 +10,9 @@ export class SocketManager {
   public authToken : string = "";
   public SocketUrl : string= "";
   public socketLoaded : boolean = false;
-
+  public popupManager!: PopupManager
   constructor() { 
-   
+
   }
   onToken(data : {socketUrl : string, authToken : string}){
     try { 

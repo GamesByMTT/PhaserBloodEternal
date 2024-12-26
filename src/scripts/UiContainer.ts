@@ -47,6 +47,7 @@ export default class UiContainer extends GameObjects.Container {
         this.logout();
         this.bottomPanel()
         this.scene.events.on("updateWin", this.updateData, this)
+        this.scene.events.on("redSmokeAnimation", this.redSmokeAnimation, this)
     }
     //Bet Panel with plus and minus Buttton 
     betPerLineUI(){
@@ -127,7 +128,13 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("blueCircle")
         ]
         this.maxbetButton = new InteractiveBtn(this.scene, maxbetButton, ()=>{
-            console.log("fgbfgbfgbfg");
+            if(!this.isSpinning){
+                currentGameData.currentBetIndex = initData.gameData.Bets.length - 1;
+                const currentBet = initData.gameData.Bets[currentGameData.currentBetIndex];
+                const betAmount = initData.gameData.Bets[currentGameData.currentBetIndex] * initData.gameData.Lines.length
+                this.currentBet.updateLabelText(currentBet)
+                this.totalBetAmount.updateLabelText(betAmount.toString())
+            }
             
         }, 4, true)
         // Add pointerup event to reset text scale
@@ -154,6 +161,7 @@ export default class UiContainer extends GameObjects.Container {
         this.spinButton = new InteractiveBtn(this.scene, spinTexture, ()=>{
             if (this.isSpinning) return;
             this.isSpinning = true;
+            this.spinText.updateLabelText("");
             this.onSpin(true)
             Globals.Socket?.sendMessage("SPIN", { 
                 currentBet: currentGameData.currentBetIndex, 
@@ -178,15 +186,16 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("greyCircle")
         ]
         this.doubleUPButton = new InteractiveBtn(this.scene, doubleUp, ()=>{
-
-        }, 6, true)
+            console.log("Check DoubleUP");
+            this.popupManager.showGamblePopup({})
+        }, 6, true).disableInteractive()
         const doubleUPText = this.scene.add.text(0, 0, "Double\nUp", {fontFamily: "Deutsch", fontSize: "28px", color:"#ffffff", align:"center"}).setOrigin(0.5)
-        this.doubleUPButton.on("pointerdown", ()=>{
-            doubleUPText.setScale(0.8)
-        })
-        this.doubleUPButton.on("pointerup", ()=>{
-            doubleUPText.setScale(1);
-        })
+        // this.doubleUPButton.on("pointerdown", ()=>{
+        //     doubleUPText.setScale(0.8)
+        // })
+        // this.doubleUPButton.on("pointerup", ()=>{
+        //     doubleUPText.setScale(1);
+        // })
         this.doubleUPButton.setScale(0.7)
         container.add([outerCircle, this.doubleUPButton, doubleUPText])
     }
@@ -307,7 +316,12 @@ export default class UiContainer extends GameObjects.Container {
             this.infoIconButton.disableInteractive();
             this.autoPlayButton.disableInteractive();
             this.settingButton.disableInteractive();
+            this.doubleUPButton.setTexture("greyCircle")
         }else{
+            if(ResultData.playerData.currentWining > 0){
+                this.doubleUPButton.setTexture("blueCircle")
+                this.doubleUPButton.setInteractive()
+            }
             this.betPlus.setInteractive()
             this.betMinus.setInteractive()
             this.spinButton.setInteractive();
@@ -322,7 +336,7 @@ export default class UiContainer extends GameObjects.Container {
     increaseBet(){
         currentGameData.currentBetIndex++;
         if (currentGameData.currentBetIndex >= initData.gameData.Bets.length) {
-            currentGameData.currentBetIndex = initData.gameData.Bets.length;
+            currentGameData.currentBetIndex = initData.gameData.Bets.length - 1;
         }
         const currentBet = initData.gameData.Bets[currentGameData.currentBetIndex];
         const betAmount = initData.gameData.Bets[currentGameData.currentBetIndex] * initData.gameData.Lines.length
@@ -344,7 +358,104 @@ export default class UiContainer extends GameObjects.Container {
     }
     updateData(){
         this.currentWin.updateLabelText(ResultData.playerData.currentWining.toString())
+        this.currentBalance.updateLabelText(ResultData.playerData.Balance.toFixed(2))
+        if(ResultData.playerData.currentWining > 0){
+            this.spinText.updateLabelText(`You Won ${ResultData.playerData.currentWining}!`)
+        }else{
+            this.spinText.updateLabelText("Better Luck Next Time")
+        }
     }
+
+    redSmokeAnimation() {
+        // Add dark overlay background
+        const overlay = this.scene.add.graphics();
+        overlay.setDepth(9); // Make sure it's behind the smoke and text
+        
+        // Fill with semi-transparent black
+        overlay.fillStyle(0x000000, 0.9); // Color: black, Alpha: 0.7 (adjust alpha for transparency)
+        overlay.fillRect(0, 0, gameConfig.scale.width, gameConfig.scale.height);
+       
+        const targetAmount = ResultData.playerData.currentWining;  
+        // Create smoke screen animation frames
+        const smokeScreen = [];
+        for(let j = 0; j < 27; j++){
+            smokeScreen.push({key: `RedSmoke${j}`});
+        }
+        if (!this.scene.anims.exists('RedSmokeScreen')) {
+            this.scene.anims.create({
+                key: 'RedSmokeScreen',
+                frames: smokeScreen,
+                frameRate: 15,
+                repeat: 0,
+                duration: 1400
+            });
+        }
+       
+        const smokeContainer = this.scene.add.container(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.5)
+        smokeContainer.setDepth(10); // Set depth above overlay
+        // Create smoke sprite centered on the slot mask
+        const smokeSprite = this.scene.add.sprite(0, 0, 'RedSmoke0')
+            .setScale(2)
+            .setVisible(false);
+       
+        // Create winning amount text centered on the mask
+        const winText = this.scene.add.text(0, 0, '0', {
+            fontSize: '64px',
+            color: '#FFD700',
+            fontFamily: 'Deutsch',
+            align:"center"
+        }).setOrigin(0.5);
+       
+        smokeContainer.add([smokeSprite, winText]);
+        smokeSprite.setVisible(true);
+        
+        // Fade in overlay
+        this.scene.tweens.add({
+            targets: overlay,
+            alpha: { from: 0, to: 0.7 },
+            duration: 300,
+            ease: 'Linear',
+            onComplete: () => {
+                // Play smoke animation after overlay is visible
+                smokeSprite.play('RedSmokeScreen');
+            }
+        });
+        // Animate the winning amount      
+        this.scene.tweens.addCounter({
+            from: 0,
+            to: targetAmount,
+            duration: 1000,
+            onUpdate: (tween) => {
+                const currentAmount = Math.floor(tween.getValue());
+                winText.setText(currentAmount.toString());
+            },
+            onComplete: () => {
+                winText.setText(targetAmount.toString());
+            }
+        });
+       
+        // Clean up after smoke animation
+        smokeSprite.on('animationcomplete', () => {
+            // Fade out overlay
+            this.scene.tweens.add({
+                targets: overlay,
+                alpha: 0,
+                duration: 300,
+                ease: 'Linear',
+                onComplete: () => {
+                    overlay.destroy();
+                }
+            });
+       
+            // Wait a bit before cleaning up other elements
+            this.scene.time.delayedCall(1000, () => {
+                smokeSprite.destroy();
+                winText.destroy();
+                smokeContainer.destroy();
+            });
+        });
+       }
+       
 }
 
 class InteractiveBtn extends Phaser.GameObjects.Sprite {
