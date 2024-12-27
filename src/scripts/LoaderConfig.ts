@@ -105,6 +105,7 @@ export const LoaderConfig = {
     returnToGame: "src/sprites/returnToGame.png",
     blankCircle: "src/sprites/blankCircle.png",
     borderBottom: "src/sprites/bottomBorder.png",
+    coinBg: "src/sprites/coinBg.png",
 
     //Gamble
     insideGamble: "src/sprites/insideGamble.png",
@@ -151,6 +152,24 @@ export const LoaderConfig = {
     RedSmoke24: "src/sprites/RedSmoke26.png",
     RedSmoke25: "src/sprites/RedSmoke27.png",
     RedSmoke26: "src/sprites/RedSmoke28.png",
+
+    //Coin Anim
+    coin0: "src/sprites/Coin0.png",
+    coin1: "src/sprites/Coin1.png",
+    coin2: "src/sprites/Coin2.png",
+    coin3: "src/sprites/Coin3.png",
+    coin4: "src/sprites/Coin4.png",
+    coin5: "src/sprites/Coin5.png",
+    coin6: "src/sprites/Coin6.png",
+    coin7: "src/sprites/Coin7.png",
+    coin8: "src/sprites/Coin8.png",
+    coin9: "src/sprites/Coin9.png",
+    coin10: "src/sprites/Coin10.png",
+    coin11: "src/sprites/Coin11.png",
+    coin12: "src/sprites/Coin12.png",
+    coin13: "src/sprites/Coin13.png",
+    coin14: "src/sprites/Coin14.png",
+    coin15: "src/sprites/Coin15.png",
 }
 
 export const LoaderSoundConfig: any = {

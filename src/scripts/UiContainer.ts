@@ -357,10 +357,10 @@ export default class UiContainer extends GameObjects.Container {
         }
     }
     updateData(){
-        this.currentWin.updateLabelText(ResultData.playerData.currentWining.toString())
+        this.currentWin.updateLabelText(ResultData.playerData.currentWining.toFixed(3).toString())
         this.currentBalance.updateLabelText(ResultData.playerData.Balance.toFixed(2))
         if(ResultData.playerData.currentWining > 0){
-            this.spinText.updateLabelText(`You Won ${ResultData.playerData.currentWining}!`)
+            this.spinText.updateLabelText(`You Won ${ResultData.playerData.currentWining.toFixed(3)}!`)
         }else{
             this.spinText.updateLabelText("Better Luck Next Time")
         }

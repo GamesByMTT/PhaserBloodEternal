@@ -131,15 +131,15 @@ export default class Slots extends Phaser.GameObjects.Container{
             this.reelTween[reelIndex].stop(); 
         }    
         const reel = this.reelContainers[reelIndex];
-        const spinDistance = this.spacingY * 4;
-        let delayCall = reelIndex * 1
+        const spinDistance = this.spacingY * 2;
+        let delayCall = reelIndex * 2
         // const spinDistance = this.spacingY * this.slotSymbols[reelIndex].length; // Use full length of symbols
         //ease Back.easin is used when the reel is moving up
         this.reelTween[reelIndex] = this.scene.tweens.add({
             targets: reel,
             delay: delayCall,
             y: `+=${spinDistance}`,
-            duration: 200,
+            duration: 300,
             dealy: this.reelContainers[reelIndex],
             ease: 'Back.easeIn',
             repeat: 0,
