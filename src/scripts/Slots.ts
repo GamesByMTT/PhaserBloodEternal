@@ -58,6 +58,9 @@ export default class Slots extends Phaser.GameObjects.Container{
         const visibleSymbol = 3
         const startIndex = 1
         const totalSymbolsPerReel = 16; 
+        for (let i = 0; i < 5; i++) {
+            this.winningFrames.push({ key: `newWinRing${i}` });
+        }
                
         const initialYOffset = (totalSymbol - startIndex - visibleSymbol) * this.spacingY;
         for (let i = 0; i < 6; i++) { 
@@ -131,31 +134,18 @@ export default class Slots extends Phaser.GameObjects.Container{
             this.reelTween[reelIndex].stop(); 
         }    
         const reel = this.reelContainers[reelIndex];
-        const spinDistance = this.spacingY * 2;
+        const spinDistance = this.spacingY * 8;
         let delayCall = reelIndex * 2
         // const spinDistance = this.spacingY * this.slotSymbols[reelIndex].length; // Use full length of symbols
         //ease Back.easin is used when the reel is moving up
         this.reelTween[reelIndex] = this.scene.tweens.add({
             targets: reel,
-            delay: delayCall,
             y: `+=${spinDistance}`,
-            duration: 300,
-            dealy: this.reelContainers[reelIndex],
-            ease: 'Back.easeIn',
-            repeat: 0,
-            onComplete: () => {
-                const spinDistance = this.spacingY * 8;
-                // this.updateReelSymbols(reelIndex)
-                this.reelTween[reelIndex] = this.scene.tweens.add({
-                    targets: reel,
-                    y: `+=${spinDistance}`,
-                    duration: 400,
-                    ease: 'Linear',
-                    repeat: -1,
-                    onComplete:() =>{
+            duration: 400,
+            ease: 'Linear',
+            repeat: -1,
+            onComplete:() =>{
 
-                    }
-                })
             },
         });
     }
@@ -209,30 +199,30 @@ export default class Slots extends Phaser.GameObjects.Container{
     }
 
     playWinningOverlayAnimation(x: number, y: number, elementId: number) {
+        console.log("playWinningOverlayAnimation", elementId);
+        
         const winAnimX = this.slotSymbols[y][x].symbol.x;
         const winAnimY = this.slotSymbols[y][x].symbol.y;
         // Create winning ring animation
-        for (let i = 0; i < 14; i++) {
-            this.winningFrames.push({ key: `winRing${i}` });
-        }
+       
         // Create animations
-        if (!this.scene.anims.exists(`winningAnim_${elementId}`)) {
+        if (!this.scene.anims.exists(`newWinRing${elementId}`)) {
             this.scene.anims.create({
-                key: `winningAnim_${elementId}`,
+                key: `newWinRing${elementId}`,
                 frames: this.winningFrames,
-                frameRate: 30,
-                repeat: 0
+                frameRate: 40,
+                repeat: 1
             });
         }
     
         const targetContainer = this.slotSymbols[y][x].symbol.parentContainer;
         // Create winning sprite on the symbol
-        const winningSprite = this.scene.add.sprite(winAnimX, winAnimY, 'winRing0')
+        const winningSprite = this.scene.add.sprite(winAnimX, winAnimY, 'newWinRing0')
             .setDepth(12)
-            .setName(`winningSprite_${x}_${y}`);
+            .setName(`newWinRing_${x}_${y}`);
             targetContainer.add(winningSprite);
             this.slotSymbols[y][x].winningSprite = winningSprite;
-            winningSprite.play(`winningAnim_${elementId}`);
+            winningSprite.play(`newWinRing${elementId}`);
     
             // When winning animation completes, play smoke animation and start counter
             winningSprite.on('animationcomplete', () => {

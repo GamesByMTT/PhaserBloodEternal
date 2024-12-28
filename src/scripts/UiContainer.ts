@@ -406,7 +406,6 @@ export default class UiContainer extends GameObjects.Container {
             align:"center"
         }).setOrigin(0.5);
        
-        smokeContainer.add([smokeSprite, winText]);
         smokeSprite.setVisible(true);
         
         // Fade in overlay
@@ -430,9 +429,11 @@ export default class UiContainer extends GameObjects.Container {
                 winText.setText(currentAmount.toString());
             },
             onComplete: () => {
-                winText.setText(targetAmount.toString());
+                // winText.setText(targetAmount.toString());
             }
         });
+
+        smokeContainer.add([smokeSprite, winText]);
        
         // Clean up after smoke animation
         smokeSprite.on('animationcomplete', () => {
@@ -448,7 +449,7 @@ export default class UiContainer extends GameObjects.Container {
             });
        
             // Wait a bit before cleaning up other elements
-            this.scene.time.delayedCall(1000, () => {
+            this.scene.time.delayedCall(9000, () => {
                 smokeSprite.destroy();
                 winText.destroy();
                 smokeContainer.destroy();

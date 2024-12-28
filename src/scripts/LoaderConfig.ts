@@ -125,6 +125,13 @@ export const LoaderConfig = {
     winRing12: "src/sprites/WinRing13.png",
     winRing13: "src/sprites/WinRing14.png",
 
+    //new Win 
+    newWinRing0: "src/sprites/newwinRing0.png",
+    newWinRing1: "src/sprites/newwinRing1.png",
+    newWinRing2: "src/sprites/newwinRing2.png",
+    newWinRing3: "src/sprites/newwinRing3.png",
+    newWinRing4: "src/sprites/newwinRing4.png",
+
     RedSmoke0: "src/sprites/RedSmoke2.png",
     RedSmoke1: "src/sprites/RedSmoke3.png",
     RedSmoke2: "src/sprites/RedSmoke4.png",
