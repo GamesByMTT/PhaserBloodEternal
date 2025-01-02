@@ -106,6 +106,9 @@ export const LoaderConfig = {
     blankCircle: "src/sprites/blankCircle.png",
     borderBottom: "src/sprites/bottomBorder.png",
     coinBg: "src/sprites/coinBg.png",
+    redVampire: "src/sprites/RedVamp.png",
+    blueVampire: "src/sprites/BlueVamp.png",
+    payLine: "src/sprites/PayLine.png",
 
     //Gamble
     insideGamble: "src/sprites/insideGamble.png",
