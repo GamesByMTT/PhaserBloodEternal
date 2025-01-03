@@ -28,7 +28,7 @@ export default class InfoPopup extends Phaser.GameObjects.Container {
         const nextButtonText = this.scene.add.text(nextButton.x, nextButton.y, "Next", {fontFamily: "Deutsch", fontSize: '27px', color: '#ffffff'}).setOrigin(0.5)
         const headingBg = scene.add.sprite(gameConfig.scale.width * 0.5, bg.y - bg.height / 2 + 50, "headingBg").setScale(0.7)
         // Add content
-        const bottomText = this.scene.add.text(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.73, "GAME PAYS LEFT TO RIGHT AND RIGHT TO LEFT HIGHEST\nWIn ONLY PER LINE DIRECTION PAYS ON A \nWIN LINE PAYS ONCE ALL LINES PAYED MULTIPLIED BY LINE BET.\nMISUSE/MALFUNCTION VOIDS ALL PAYS AND PLAYS", {fontFamily:"CinzelDecorative", fontSize:"20px", color:"#ffffff", align:"center", strokeThickness:1.2}).setOrigin(0.5)
+        const bottomText = this.scene.add.text(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.73, "GAME PAYS LEFT TO RIGHT AND RIGHT TO LEFT HIGHEST\nWIn ONLY PER LINE DIRECTION PAYS ON A \nWIN LINE PAYS ONCE ALL LINES PAYED MULTIPLIED BY LINE BET.\nMISUSE/MALFUNCTION VOIDS ALL PAYS AND PLAYS", {fontFamily:"CinzelDecorative", fontSize:"18px", color:"#ffffff", align:"center", strokeThickness:1.2}).setOrigin(0.5)
        
         // Add your info content here
 
@@ -151,37 +151,53 @@ export default class InfoPopup extends Phaser.GameObjects.Container {
         //page four start
         this.pages[4] = this.scene.add.container()
         const titlefour = this.scene.add.text(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.185, "PAYOUTS",  { fontFamily:"CinzelDecorative", fontSize: '35px', color: '#ffffff', align:"center", strokeThickness:1.5 } ).setOrigin(0.5);
-        const pageHeading = this.scene.add.text(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.28, "STANDARD SYMBOLS!", {fontFamily:"CinzelDecorative", fontSize:"27px", align: "center", color:"#ffffff", strokeThickness: 2}).setOrigin(0.5)
-        const slots0 = this.scene.add.sprite(gameConfig.scale.width * 0.38, gameConfig.scale.height * 0.38, "slots0_0").setScale(0.6).setOrigin(0.5)
-        const slots0FirstText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.33, "6X - 70", {fontFamily:"CinzelDecorative", fontSize:"25px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
-        const slots0SecondText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.36, "5X - 50", {fontFamily:"CinzelDecorative", fontSize:"25px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
-        const slots0ThirdText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.39, "4X - 30", {fontFamily:"CinzelDecorative", fontSize:"25px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
-        const slots0FourthText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.42, "3X - 15", {fontFamily:"CinzelDecorative", fontSize:"25px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const pageHeading = this.scene.add.text(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.27, "STANDARD SYMBOLS!", {fontFamily:"CinzelDecorative", fontSize:"27px", align: "center", color:"#ffffff", strokeThickness: 2}).setOrigin(0.5)
+        const slots0 = this.scene.add.sprite(gameConfig.scale.width * 0.38, gameConfig.scale.height * 0.36, "slots0_0").setScale(0.6).setOrigin(0.5)
+        const slots0FirstText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.31, "6X - 70", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots0SecondText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.34, "5X - 50", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots0ThirdText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.37, "4X - 30", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots0FourthText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.4, "3X - 15", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
         
         
         
-        const slots1 = this.scene.add.sprite(gameConfig.scale.width * 0.55, gameConfig.scale.height * 0.38, "slots1_0").setScale(0.6).setOrigin(0.5)
-        const slots1FirstText = this.scene.add.text(gameConfig.scale.width * 0.6, gameConfig.scale.height * 0.33, "6X - 70", {fontFamily:"CinzelDecorative", fontSize:"25px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
-        const slots1SecondText = this.scene.add.text(gameConfig.scale.width * 0.6, gameConfig.scale.height * 0.36, "5X - 50", {fontFamily:"CinzelDecorative", fontSize:"25px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
-        const slots1ThirdText = this.scene.add.text(gameConfig.scale.width * 0.6, gameConfig.scale.height * 0.39, "4X - 30", {fontFamily:"CinzelDecorative", fontSize:"25px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
-        const slots1FourthText = this.scene.add.text(gameConfig.scale.width * 0.6, gameConfig.scale.height * 0.42, "3X - 15", {fontFamily:"CinzelDecorative", fontSize:"25px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots1 = this.scene.add.sprite(gameConfig.scale.width * 0.55, gameConfig.scale.height * 0.36, "slots1_0").setScale(0.6).setOrigin(0.5)
+        const slots1FirstText = this.scene.add.text(gameConfig.scale.width * 0.6, gameConfig.scale.height * 0.31, "6X - 70", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots1SecondText = this.scene.add.text(gameConfig.scale.width * 0.6, gameConfig.scale.height * 0.34, "5X - 50", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots1ThirdText = this.scene.add.text(gameConfig.scale.width * 0.6, gameConfig.scale.height * 0.37, "4X - 30", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots1FourthText = this.scene.add.text(gameConfig.scale.width * 0.6, gameConfig.scale.height * 0.4, "3X - 15", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
 
         const slots2 = this.scene.add.sprite(gameConfig.scale.width * 0.38, gameConfig.scale.height * 0.5, "slots2_0").setScale(0.6).setOrigin(0.5)
-        const slots2FirstText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.45, "6X - 70", {fontFamily:"CinzelDecorative", fontSize:"25px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
-        const slots2SecondText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.48, "5X - 50", {fontFamily:"CinzelDecorative", fontSize:"25px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
-        const slots2ThirdText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.51, "4X - 30", {fontFamily:"CinzelDecorative", fontSize:"25px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
-        const slots2FourthText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.54, "3X - 15", {fontFamily:"CinzelDecorative", fontSize:"25px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots2FirstText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.45, "6X - 70", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots2SecondText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.48, "5X - 50", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots2ThirdText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.51, "4X - 30", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots2FourthText = this.scene.add.text(gameConfig.scale.width * 0.43, gameConfig.scale.height * 0.54, "3X - 15", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
 
         const slots3 = this.scene.add.sprite(gameConfig.scale.width * 0.55, gameConfig.scale.height * 0.5, "slots3_0").setScale(0.6).setOrigin(0.5)
-
-        const winPayLine = this.scene.add.sprite(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.63, "payLine").setOrigin(0.5).setScale(0.8)
+        const slots3FirstText = this.scene.add.text(gameConfig.scale.width * 0.6, gameConfig.scale.height * 0.45, "6X - 70", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots3SecondText = this.scene.add.text(gameConfig.scale.width * 0.6, gameConfig.scale.height * 0.48, "5X - 50", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots3ThirdText = this.scene.add.text(gameConfig.scale.width * 0.6, gameConfig.scale.height * 0.51, "4X - 30", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const slots3FourthText = this.scene.add.text(gameConfig.scale.width * 0.6, gameConfig.scale.height * 0.54, "3X - 15", {fontFamily:"CinzelDecorative", fontSize:"23px", align: "center", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const payLineHeading = this.scene.add.text(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.57, "WIN LINES", {fontFamily: "CinzelDecorative", fontSize: "25px", color: "#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const winPayLine = this.scene.add.sprite(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.64, "payLine").setOrigin(0.5).setScale(0.8)
 
         this.pages[4].add([titlefour, pageHeading, slots0, slots1, slots2, slots3, winPayLine, slots0FirstText, slots0SecondText, slots0ThirdText, slots0FourthText, slots1FirstText, slots1SecondText, slots1ThirdText, slots1FourthText, 
-            slots2FirstText, slots2SecondText, slots2ThirdText, slots2FourthText
+            slots2FirstText, slots2SecondText, slots2ThirdText, slots2FourthText, slots3FirstText, slots3SecondText, slots3ThirdText, slots3FourthText, payLineHeading
         ])
         this.add(this.pages[4]);
 
-        this.pages = [this.pages[1], this.pages[2], this.pages[3], this.pages[4]];
+        this.pages[5] = this.scene.add.container();
+        const titlefive = this.scene.add.text(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.185, "DOUBLE GAME",  { fontFamily:"CinzelDecorative", fontSize: '35px', color: '#ffffff', align:"center", strokeThickness:1.5 } ).setOrigin(0.5);
+        const coin = this.scene.add.sprite(gameConfig.scale.width * 0.35, gameConfig.scale.height * 0.36, "coin0").setScale(0.4).setOrigin(0.5)
+        const outerCircle = this.scene.add.sprite(gameConfig.scale.width * 0.65, gameConfig.scale.height * 0.36, "circleBg").setScale(1.1).setOrigin(0.5)
+        const doubleCoin = this.scene.add.sprite(gameConfig.scale.width * 0.65, gameConfig.scale.height * 0.365, "blueCircle").setScale(0.5).setScale(1.4)
+        const doubleText = this.scene.add.text(gameConfig.scale.width * 0.65, gameConfig.scale.height * 0.36, "Double\nUp", {fontFamily: "Deutsch", fontSize:"30px", color:"#ffffff", align:"center"}).setOrigin(0.5)
+        const doubleHeading = this.scene.add.text(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.36, "DOUBLE UP GAME", {fontFamily:"CinzelDecorative", fontSize: "38px", color:"#ffffff", strokeThickness: 1.8}).setOrigin(0.5)
+        const doubleGameText = this.scene.add.text(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.57, "PRESS THE DOUBLE UP BUTTON AFTER ANY STANDARD WINS TO GAMBLE YOUR WINNINGS.\nDOUBLE UP IS UNAVAILABLE AFTER FREE SPINS FEATURE.\nGAMBLE 50% OR ALL YOUR WINNINGS.\nSELECT GAMBLE ALL OR GAMBLE 50% AND THEN BET BY PRESSINS HEADS OR TAILS. THE COIN WILL SPIN AND IF YOUR GUESS WAS CORRECT YOU WILL DOUBLE YOUR STAKE. PRESS COLLECT TO COLLECT YOUR WINNINGS AND RETURN TO THE GAME",{fontFamily:"CinzelDecorative", fontSize:"23px", color: "#ffffff", align:"center",strokeThickness: 1.8,wordWrap:{ width: 1100, useAdvancedWrap: true}}).setOrigin(0.5)
+        this.pages[5].add([titlefive, coin, outerCircle, doubleCoin, doubleText, doubleHeading, doubleGameText]);
+
+        this.add(this.pages[5])
+
+        this.pages = [this.pages[1], this.pages[2], this.pages[3], this.pages[4], this.pages[5]];
         this.currentPageIndex = 0;
         
         // Set initial visibility 

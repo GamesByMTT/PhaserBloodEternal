@@ -186,7 +186,6 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("greyCircle")
         ]
         this.doubleUPButton = new InteractiveBtn(this.scene, doubleUp, ()=>{
-            console.log("Check DoubleUP");
             this.popupManager.showGamblePopup({})
         }, 6, true).disableInteractive()
         const doubleUPText = this.scene.add.text(0, 0, "Double\nUp", {fontFamily: "Deutsch", fontSize: "28px", color:"#ffffff", align:"center"}).setOrigin(0.5)
@@ -375,7 +374,7 @@ export default class UiContainer extends GameObjects.Container {
         overlay.fillStyle(0x000000, 0.9); // Color: black, Alpha: 0.7 (adjust alpha for transparency)
         overlay.fillRect(0, 0, gameConfig.scale.width, gameConfig.scale.height);
        
-        const targetAmount = ResultData.playerData.currentWining;  
+        
         // Create smoke screen animation frames
         const smokeScreen = [];
         for(let j = 0; j < 27; j++){
@@ -390,24 +389,24 @@ export default class UiContainer extends GameObjects.Container {
                 duration: 1400
             });
         }
-       
+        const targetAmount = ResultData.playerData.currentWining;
         const smokeContainer = this.scene.add.container(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.5)
-        smokeContainer.setDepth(10); // Set depth above overlay
-        // Create smoke sprite centered on the slot mask
+        smokeContainer.setDepth(10);
+
         const smokeSprite = this.scene.add.sprite(0, 0, 'RedSmoke0')
             .setScale(2)
             .setVisible(false);
-       
+
         // Create winning amount text centered on the mask
         const winText = this.scene.add.text(0, 0, '0', {
             fontSize: '64px',
             color: '#FFD700',
             fontFamily: 'Deutsch',
-            align:"center"
+            align: "center"
         }).setOrigin(0.5);
-       
+
         smokeSprite.setVisible(true);
-        
+
         // Fade in overlay
         this.scene.tweens.add({
             targets: overlay,
@@ -415,29 +414,45 @@ export default class UiContainer extends GameObjects.Container {
             duration: 300,
             ease: 'Linear',
             onComplete: () => {
-                // Play smoke animation after overlay is visible
                 smokeSprite.play('RedSmokeScreen');
             }
         });
-        // Animate the winning amount      
-        this.scene.tweens.addCounter({
-            from: 0,
-            to: targetAmount,
-            duration: 1000,
-            onUpdate: (tween) => {
-                const currentAmount = Math.floor(tween.getValue());
-                winText.setText(currentAmount.toString());
-            },
-            onComplete: () => {
-                // winText.setText(targetAmount.toString());
+
+        // Format number function
+        const formatNumber = (num: number) => {
+            // Handle different decimal places based on the number size
+            if (num < 0.01) {
+                return num.toFixed(6); // Show more decimals for very small numbers
+            } else if (num < 1) {
+                return num.toFixed(3); // Show 3 decimals for numbers less than 1
+            } else {
+                return num.toFixed(2); // Show 2 decimals for numbers >= 1
             }
+        };
+
+        // Calculate appropriate step size based on target amount
+        const steps = 50; // Number of steps for the animation
+        const stepSize = targetAmount / steps;
+        let currentValue = 0;
+
+        // Create a custom counter
+        const counter = this.scene.time.addEvent({
+            delay: 1000 / steps, // Distribute steps over 1 second
+            callback: () => {
+                currentValue += stepSize;
+                if (currentValue >= targetAmount) {
+                    currentValue = targetAmount;
+                    counter.remove();
+                }
+                winText.setText(formatNumber(currentValue));
+            },
+            repeat: steps - 1
         });
 
         smokeContainer.add([smokeSprite, winText]);
-       
+
         // Clean up after smoke animation
         smokeSprite.on('animationcomplete', () => {
-            // Fade out overlay
             this.scene.tweens.add({
                 targets: overlay,
                 alpha: 0,
@@ -445,17 +460,14 @@ export default class UiContainer extends GameObjects.Container {
                 ease: 'Linear',
                 onComplete: () => {
                     overlay.destroy();
+                    smokeSprite.destroy();
+                    winText.destroy();
+                    smokeContainer.destroy();
+                    this.scene.events.emit("increamentDone")
                 }
             });
-       
-            // Wait a bit before cleaning up other elements
-            this.scene.time.delayedCall(9000, () => {
-                smokeSprite.destroy();
-                winText.destroy();
-                smokeContainer.destroy();
-            });
         });
-       }
+    }
        
 }
 
