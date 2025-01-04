@@ -40,7 +40,7 @@ export default class UiContainer extends GameObjects.Container {
         this.maxBetUI();
         this.spinUI(spinCallBack);
         this.doubleupUI();
-        this.autoPlayUI();
+        this.autoPlayUI(spinCallBack);
         this.settingUI();
         this.soundUI();
         this.infoiconUI();
@@ -48,6 +48,7 @@ export default class UiContainer extends GameObjects.Container {
         this.bottomPanel()
         this.scene.events.on("updateWin", this.updateData, this)
         this.scene.events.on("redSmokeAnimation", this.redSmokeAnimation, this)
+        this.scene.events.on("freeSpin", () => this.freeSpinStart(spinCallBack), this)
     }
     //Bet Panel with plus and minus Buttton 
     betPerLineUI(){
@@ -160,22 +161,42 @@ export default class UiContainer extends GameObjects.Container {
         ]
         this.spinButton = new InteractiveBtn(this.scene, spinTexture, ()=>{
             if (this.isSpinning) return;
-            this.isSpinning = true;
-            this.spinText.updateLabelText("");
-            this.onSpin(true)
-            Globals.Socket?.sendMessage("SPIN", { 
-                currentBet: currentGameData.currentBetIndex, 
-                currentLines: initData.gameData.Lines.length, 
-                spins: 1 
-            });
-            spinCallBack();
-            // Reset the flag after some time or when spin completes
-            setTimeout(() => {
-                this.isSpinning = false;
-            }, 1200); // Adjust timeout as needed
+            this.startSpining(spinCallBack)
         }, 5, true)
         this.spinButton.setScale(0.75)
         container.add([redCircle, this.spinButton, spinText])
+    }
+
+    startSpining(spinCallBack: () => void){
+        this.isSpinning = true;
+        this.spinText.updateLabelText("");
+        this.onSpin(true)
+        Globals.Socket?.sendMessage("SPIN", { 
+                currentBet: currentGameData.currentBetIndex, 
+                currentLines: initData.gameData.Lines.length, 
+                spins: 1 
+        });
+        spinCallBack();
+        // Reset the flag after some time or when spin completes
+        setTimeout(() => {
+            this.isSpinning = false;
+        }, 1200); // Adjust timeout as needed
+    }
+
+    freeSpinStart(spinCallBack: () => void){
+        this.isSpinning = true;
+        this.spinText.updateLabelText("");
+        this.onSpin(true)
+        Globals.Socket?.sendMessage("SPIN", { 
+            currentBet: currentGameData.currentBetIndex, 
+            currentLines: initData.gameData.Lines.length, 
+            spins: 1 
+        });
+        spinCallBack();
+            // Reset the flag after some time or when spin completes
+        setTimeout(() => {
+            this.isSpinning = false;
+        }, 1200); // Adjust timeout as needed
     }
     //doubleupUI
     doubleupUI(){
@@ -199,7 +220,7 @@ export default class UiContainer extends GameObjects.Container {
         container.add([outerCircle, this.doubleUPButton, doubleUPText])
     }
     //Auto Play Button UI
-    autoPlayUI(){
+    autoPlayUI(spinCallBack: () => void){
         const container = this.scene.add.container(gameConfig.scale.width * 0.81, gameConfig.scale.height * 0.94)
         const outerCircle = this.scene.add.sprite(0, 0, "circleBg").setScale(0.75)
         const autoPlay = [
@@ -207,7 +228,8 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("blueCircle")
         ]
         this.autoPlayButton = new InteractiveBtn(this.scene, autoPlay, ()=>{
-
+            currentGameData.isAutoSpin = !currentGameData.isAutoSpin
+            this.freeSpinStart(spinCallBack)
         }, 7, true);
         const autoPlayText = this.scene.add.text(0, 0, "Auto\nPlay",{fontFamily: "Deutsch", fontSize: "28px", color:"#ffffff", align:"center"}).setOrigin(0.5)
         this.autoPlayButton.setScale(0.9)
@@ -384,7 +406,7 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.anims.create({
                 key: 'RedSmokeScreen',
                 frames: smokeScreen,
-                frameRate: 15,
+                frameRate: 20,
                 repeat: 0,
                 duration: 1400
             });
@@ -456,17 +478,59 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.tweens.add({
                 targets: overlay,
                 alpha: 0,
-                duration: 300,
+                duration: 500,
                 ease: 'Linear',
                 onComplete: () => {
                     overlay.destroy();
                     smokeSprite.destroy();
-                    winText.destroy();
+                    startMovementAnimation();
+                    // winText.destroy();
+                     // Create a more complex animation timeline
                     smokeContainer.destroy();
-                    this.scene.events.emit("increamentDone")
+                    // this.scene.events.emit("increamentDone")
                 }
             });
         });
+
+        const startMovementAnimation = () => {
+            // Remove text from container and add it directly to the scene
+            smokeContainer.remove(winText);
+            this.scene.add.existing(winText);
+       
+            // Calculate global position
+            const globalPos = smokeContainer.getWorldTransformMatrix().transformPoint(0, 0);
+            winText.setPosition(globalPos.x, globalPos.y);
+       
+            // Create movement animation
+            this.scene.tweens.add({
+                targets: winText,
+                x: gameConfig.scale.width * 0.5,
+                y: gameConfig.scale.height * 0.95 - 25,
+                scale: { from: 1, to: 0.3 },
+                alpha: { from: 1, to: 0 },
+                duration: 1000,
+                ease: 'Power2',
+                onComplete: () => {
+                    winText.destroy();
+                    this.scene.events.emit("increamentDone");
+                    this.onSpin(false)
+                }
+            });
+       
+            // Fade out overlay and cleanup
+            this.scene.tweens.add({
+                targets: overlay,
+                alpha: 0,
+                duration: 500,
+                ease: 'Linear',
+                onComplete: () => {
+                    overlay.destroy();
+                    smokeSprite.destroy();
+                    smokeContainer.destroy();
+                }
+            });
+        };
+       
     }
        
 }

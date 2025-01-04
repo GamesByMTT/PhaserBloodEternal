@@ -44,7 +44,8 @@ export const currentGameData = {
     soundMode: true,
     musicMode: true,
     speakerVolume: true,
-    turboMode: false
+    turboMode: false,
+    isAutoSpin: true
 }
 
 export const initData = {
@@ -88,13 +89,14 @@ export const ResultData = {
         ResultReel: [[]],
         batPayout: [],
         winAmount: 0,
+        count: 0,
         linesToEmit:[],
         symbolsToEmit : [], 
+        batPositions: [],
+        bloodSplash: [],
         isBonus: false,
-        freeSpins :{
-            count: 0,
-            isNewAdded: false,
-        }
+        isFreeSpin:  false,
+        vampHuman:[]
     },
     playerData:{
         Balance: 0,

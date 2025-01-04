@@ -4,6 +4,7 @@ import UiContainer from "../scripts/UiContainer";
 import { PopupManager } from "../scripts/PopupManager";
 import Slots from "../scripts/Slots";
 import SoundManager from "../scripts/SoundManager";
+import { gameConfig } from "../scripts/appConfig";
 
 export default class MainScene extends Scene {
     Background!: GameObjects.Sprite
@@ -24,10 +25,18 @@ export default class MainScene extends Scene {
     purpleReelAnim: Phaser.Types.Animations.AnimationFrame[] = []
     redReelSpite!: GameObjects.Sprite
     purpleReelSprite!: GameObjects.Sprite
+    purplesymbolAnim: Phaser.Types.Animations.AnimationFrame[] = []
+    public backgroundAnimContainer!: Phaser.GameObjects.Container;
+    purpleSymbol!:GameObjects.Sprite
+    mVampire: Phaser.Types.Animations.AnimationFrame[] = []
+    wVampire: Phaser.Types.Animations.AnimationFrame[] = []
+    vampireMale!: Phaser.GameObjects.Sprite;
+    vampireFemale!: Phaser.GameObjects.Sprite;
     constructor() {
         super({key: 'MainScene'})
     }
     create(){
+        this.backgroundAnimContainer = this.add.container();
         this.popupManager = new PopupManager(this)
         this.soundManager = new SoundManager(this)
         const {width, height} = this.cameras.main;
@@ -80,17 +89,47 @@ export default class MainScene extends Scene {
             repeat: -1
         })
 
-        this.mainContainer.add([this.Background, this.candles, this.logo,this.reelBg, this.redReelSpite, this.purpleReelSprite, this.candleOne, this.candleTwo, this.candleThree, this.candleFour, this.candleFive,  this.uiContainer]);
+        for(let j = 0; j < 36; j++){
+            this.purplesymbolAnim.push({key: `purpleSymbol${j}`})
+        }
+        this.anims.create({
+            key: 'purpleSymbol',
+            frames: this.purplesymbolAnim,
+            frameRate: 20,
+            repeat: -1
+        })
+        this.mainContainer.add([this.Background, this.candles, this.logo,this.reelBg, this.backgroundAnimContainer, this.redReelSpite, this.purpleReelSprite, this.candleOne, this.candleTwo, this.candleThree, this.candleFour, this.candleFive,  this.uiContainer]);
+        
+        for(let p = 0; p < 14; p++){
+            this.mVampire.push({key: `maleVampire${p}`});
+            this.wVampire.push({key: `womanVampire${p}`});
+        }
+
+        this.anims.create({
+            key: 'maleVampire',
+            frames: this.mVampire,
+            frameRate: 25,
+            repeat: 0
+        })
+
+        this.anims.create({
+            key: 'womanVampire',
+            frames: this.wVampire,
+            frameRate: 25,
+            repeat: 0
+        })
+        this.vampireMale = new Phaser.GameObjects.Sprite(this, gameConfig.scale.width * 0.38, gameConfig.scale.height * 0.24, 'maleVampire0').setOrigin(0.5).setScale(0.95);
+        this.vampireMale.play('maleVampire')
         
         this.slots = new Slots(this, this.uiContainer, ()=> this.onResultCallBack(), this.soundManager)
-        this.mainContainer.add(this.slots)
+        this.mainContainer.add([this.slots, this.vampireMale])
         this.redReelCotainer()
     }
 
     redReelCotainer(){        
         this.redReelSpite.setPosition(this.slots.slotMask.x + (this.slots.symbolWidth * 2) + 44, this.cameras.main.height * 0.455)
         this.redReelSpite.play("red")
-        this.purpleReelSprite.setPosition(this.slots.slotMask.x + (this.slots.symbolWidth * 2) + 44, this.cameras.main.height * 0.455).setVisible(true)
+        this.purpleReelSprite.setPosition(this.slots.slotMask.x + (this.slots.symbolWidth * 2) + 44, this.cameras.main.height * 0.455)
         this.purpleReelSprite.play("purple")
     }
     onSpinCallBack(){
@@ -101,7 +140,9 @@ export default class MainScene extends Scene {
     }
     onResultCallBack(){
         const onSpinMusic = "onSpin"
-        this.uiContainer.onSpin(false);
+        if(ResultData.playerData.currentWining == 0){
+            this.uiContainer.onSpin(false);
+        }
     }
 
     shutdown() {
