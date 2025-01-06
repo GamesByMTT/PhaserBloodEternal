@@ -67,6 +67,15 @@ export class SocketManager {
             Globals.emitter?.Call("ResultData");
             console.log(data, "ResultData")  
         }
+        if(data.id == "gambleInitData"){
+          console.log(data.message, "gambleInitData");
+          
+        }
+
+        if(data.id == "GambleResult"){
+          console.log(data.message, "GambleResult");
+          
+        }
       });
     });
 
@@ -93,6 +102,8 @@ export class SocketManager {
     });
   }
   sendMessage(id : string, message: any) {
+    console.log(id, message);
+    
     this.socket.emit(
       "message",
       JSON.stringify({ id: id, data: message })

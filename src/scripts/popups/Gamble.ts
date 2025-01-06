@@ -87,6 +87,12 @@ export default class GamblePopup extends Phaser.GameObjects.Container{
         })
 
         headsButton.on("pointerdown", ()=>{
+          let data = {
+            selected: "HEADS", 
+            gambleOption:  "HALF",
+            id: "GAMBLERESULT"
+          }
+          Globals.Socket.sendMessage("GAMBLERESULT", data)
           this.coinAnim.play("coinAnimation")
           setTimeout(() => {
             this.coinAnim.stop();

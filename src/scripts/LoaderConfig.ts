@@ -109,6 +109,7 @@ export const LoaderConfig = {
     redVampire: "src/sprites/RedVamp.png",
     blueVampire: "src/sprites/BlueVamp.png",
     payLine: "src/sprites/PayLine.png",
+    winLine: "src/sprites/winLine.png",
 
     //Gamble
     insideGamble: "src/sprites/insideGamble.png",
@@ -293,9 +294,9 @@ export const LoaderConfig = {
 }
 
 export const LoaderSoundConfig: any = {
-    // backgroundMusic : "src/sounds.Teaser.wav",
-    onSpin :  "/src/sounds/slot-machine-loop.wav",
-    spinButton: "src/sounds/spin.wav",
-    winMusic: "src/sounds/win_sound.wav",
+    backgroundMusic : "src/sounds/backgroundMusic.mp3",
+    onSpin :  "/src/sounds/spinRoll.mp3",
+    spinButton: "src/sounds/spinButton.mp3",
+    winMusic: "src/sounds/winning.mp3",
     buttonpressed: "src/sounds/Game-Button.mp3",
 }

@@ -4,11 +4,13 @@ import { gameConfig } from "./appConfig";
 import UiContainer from "./UiContainer"
 import SoundManager from "./SoundManager";
 import MainScene from "../view/MainScene";
+import { LineGenerator } from "./LineGenrater";
 
 export default class Slots extends Phaser.GameObjects.Container{
     slotMask!: Phaser.GameObjects.Graphics;
     uiContainer: UiContainer;
     SoundManager: SoundManager
+    lineGenrator!: LineGenerator;
     resultCallBack: ()=> void;
     slotSymbols: any [][] = []
     winningFrames: any [] = []
@@ -32,7 +34,7 @@ export default class Slots extends Phaser.GameObjects.Container{
     constructor(scene: Phaser.Scene, uiContainer: UiContainer, callback: ()=> void, SoundManager: SoundManager){
         super(scene)
         // Create containers for smoke and win text that will be above the mask
-
+        this.lineGenrator = new LineGenerator(scene, 0, 0)
         this.resultCallBack = callback;
         this.SoundManager = SoundManager;
         this.uiContainer = uiContainer;
@@ -192,10 +194,11 @@ export default class Slots extends Phaser.GameObjects.Container{
     }
 
     stopTween() {
+        const mainScene = this.scene as MainScene;
         const { redPosition, purplePosition } = this.checkSpecialSymbols();
         for (let i = 0; i < this.reelContainers.length; i++) {
             const reel = this.reelContainers[i];
-            let reelDelay = 100 * i;
+            let reelDelay = 200 * i;
             const targetY = 0;
             // If we have a special symbol, adjust the delays
             if (redPosition >= 0 && i > redPosition) {
@@ -203,7 +206,6 @@ export default class Slots extends Phaser.GameObjects.Container{
                 reelDelay += 3000;
                 // Show red animation on the next reel
                 if (i === redPosition + 1) {
-                    const mainScene = this.scene as MainScene;
                     mainScene.redReelSpite.setVisible(true);
                     mainScene.redReelSpite.setPosition(
                         this.slotSymbols[i][0].symbol.x,
@@ -221,7 +223,6 @@ export default class Slots extends Phaser.GameObjects.Container{
                 reelDelay += 3000;
                 // Show purple animation on the next reel
                 if (i === purplePosition + 1) {
-                    const mainScene = this.scene as MainScene;
                     mainScene.purpleReelSprite.setVisible(true);
                     mainScene.purpleReelSprite.setPosition(
                         this.slotSymbols[i][0].symbol.x,
@@ -229,7 +230,7 @@ export default class Slots extends Phaser.GameObjects.Container{
                     );
                     mainScene.purpleReelSprite.play('purple');
                     // Hide the purple animation after the delay
-                    this.scene.time.delayedCall(reelDelay + 1000, () => {
+                    this.scene.time.delayedCall(reelDelay + 1300, () => {
                         mainScene.purpleReelSprite.setVisible(false);
                     });
                 }
@@ -237,10 +238,12 @@ export default class Slots extends Phaser.GameObjects.Container{
             this.scene.tweens.add({
                 targets: reel,
                 y: targetY,
-                duration: 2000,
+                duration: 3000,
                 ease: 'Cubic.easeOut',
                 onComplete: () => {
+                    this.SoundManager.stopSound("onSpin")
                     if (this.reelTween[i]) {
+
                         this.reelTween[i].stop();
                     }
                     this.createBackgroundAnimations();
@@ -256,6 +259,7 @@ export default class Slots extends Phaser.GameObjects.Container{
                 this.slotSymbols[i][j].endTween();
             }
         }
+        
         this.isSpinning = false;
     }
         
@@ -291,6 +295,7 @@ export default class Slots extends Phaser.GameObjects.Container{
     }
 
     playWinAnimations() {
+       
         this.resultCallBack();
         this.completedAnimations = 0;
         this.hasEmittedSmoke = false;
@@ -309,9 +314,10 @@ export default class Slots extends Phaser.GameObjects.Container{
         if(ResultData.playerData.currentWining > 0 && ResultData.gameData.symbolsToEmit.length == 0){
             this.scene.events.emit("redSmokeAnimation")
         }
-        if(ResultData.gameData.isFreeSpin || currentGameData.isAutoSpin){
-            this.scene.events.emit("freeSpin")
-        }
+        // if(ResultData.gameData.isFreeSpin || currentGameData.isAutoSpin){
+        //     this.scene.events.emit("freeSpin")
+        // }
+       
         this.scene.events.emit("updateWin")
     }
 
@@ -350,7 +356,7 @@ export default class Slots extends Phaser.GameObjects.Container{
     startRectangleEmit() {
         let currentArrayIndex = 0;
         let blinkCount = 0; // Counter for the number of blinks
-
+        const mainScene = this.scene as MainScene;
         const blinkNextArray = () => {
             if (this.isSpinning) {
                 return;
@@ -358,7 +364,10 @@ export default class Slots extends Phaser.GameObjects.Container{
 
             let rowArray = ResultData.gameData.symbolsToEmit[currentArrayIndex];
             currentArrayIndex = (currentArrayIndex + 1) % ResultData.gameData.symbolsToEmit.length; // Cycle through arrays
-
+            let lineNumber: any = []
+            lineNumber.push(ResultData.gameData.linesToEmit[currentArrayIndex]);
+            mainScene.hideLines()
+            mainScene.linesToShow(lineNumber)
             if (rowArray) {
                 this.blinkSymbols(rowArray, 'winRing5', () => {
                     if (this.isSpinning) {
@@ -370,6 +379,7 @@ export default class Slots extends Phaser.GameObjects.Container{
                     } else {
                         // Show the sprite on all symbols after 3 blinks
                         this.showAllWinSprites();
+                        mainScene.linesToShow(ResultData.gameData.linesToEmit)
                     }
                 });
             }
@@ -377,8 +387,8 @@ export default class Slots extends Phaser.GameObjects.Container{
         blinkNextArray();;
     }
     blinkSymbols(symbolIndices: string[], imageKey: string, onCompleteCallback?: () => void) {
-            const blinkDuration = 400;
-            const numBlinks = 3;
+            const blinkDuration = 1000;
+            const numBlinks = 1;
             
             let currentBlink = 0;
             const winningSprites: Phaser.GameObjects.Sprite[] = [];
@@ -433,7 +443,7 @@ export default class Slots extends Phaser.GameObjects.Container{
                 }
             });
         });
-        if(ResultData.gameData.isFreeSpin && ResultData.gameData.count > 0){
+        if(ResultData.gameData.isFreeSpin && ResultData.gameData.count > 0 || currentGameData.isAutoSpin){
             this.scene.events.emit("freeSpin");
         }
     }

@@ -8,7 +8,7 @@ import { TextLabel } from "./TextLabel";
 
 export default class UiContainer extends GameObjects.Container {
 
-    Soundmanager!: SoundManager
+    Soundmanager: SoundManager
     betPlus!: InteractiveBtn
     betMinus!: InteractiveBtn
     totalBetPlus!: InteractiveBtn
@@ -29,10 +29,11 @@ export default class UiContainer extends GameObjects.Container {
     spinText!: TextLabel
     public isSpinning: boolean = false;
 
-    constructor(scene: Scene, spinCallBack: () => void, SoundManager: SoundManager){
+    constructor(scene: Scene, spinCallBack: () => void, soundManager: SoundManager){
         super(scene);
         this.popupManager = new PopupManager(scene)
         scene.add.existing(this)
+        this.Soundmanager = soundManager
         this.isSpinning = false
         this.betPerLineUI();
         this.totalBetUI();
@@ -130,6 +131,7 @@ export default class UiContainer extends GameObjects.Container {
         ]
         this.maxbetButton = new InteractiveBtn(this.scene, maxbetButton, ()=>{
             if(!this.isSpinning){
+                this.buttonMusic("buttonpressed")
                 currentGameData.currentBetIndex = initData.gameData.Bets.length - 1;
                 const currentBet = initData.gameData.Bets[currentGameData.currentBetIndex];
                 const betAmount = initData.gameData.Bets[currentGameData.currentBetIndex] * initData.gameData.Lines.length
@@ -161,6 +163,7 @@ export default class UiContainer extends GameObjects.Container {
         ]
         this.spinButton = new InteractiveBtn(this.scene, spinTexture, ()=>{
             if (this.isSpinning) return;
+            this.buttonMusic("spinButton")
             this.startSpining(spinCallBack)
         }, 5, true)
         this.spinButton.setScale(0.75)
@@ -207,7 +210,12 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("greyCircle")
         ]
         this.doubleUPButton = new InteractiveBtn(this.scene, doubleUp, ()=>{
-            this.popupManager.showGamblePopup({})
+            this.buttonMusic("buttonpressed")
+            if(ResultData.playerData.currentWining > 0){
+                Globals.Socket?.sendMessage("GAMBLEINIT", { id: "GAMBLEINIT" });
+                this.popupManager.showGamblePopup({})
+            }
+            
         }, 6, true).disableInteractive()
         const doubleUPText = this.scene.add.text(0, 0, "Double\nUp", {fontFamily: "Deutsch", fontSize: "28px", color:"#ffffff", align:"center"}).setOrigin(0.5)
         // this.doubleUPButton.on("pointerdown", ()=>{
@@ -228,6 +236,7 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("blueCircle")
         ]
         this.autoPlayButton = new InteractiveBtn(this.scene, autoPlay, ()=>{
+            this.buttonMusic("buttonpressed")
             currentGameData.isAutoSpin = !currentGameData.isAutoSpin
             this.freeSpinStart(spinCallBack)
         }, 7, true);
@@ -254,6 +263,7 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("settingButton"),
         ]
         this.settingButton = new InteractiveBtn(this.scene, settingSprite, ()=>{
+            this.buttonMusic("buttonpressed")
             this.popupManager.showSettingPopup({})
         }, 9, true)
         this.settingButton.setScale(0.7)
@@ -267,7 +277,10 @@ export default class UiContainer extends GameObjects.Container {
         
         this.speakerButton = this.scene.add.sprite(0, 0, speakerSprite).setInteractive().setScale(0.4)
         this.speakerButton.on("pointerdown", ()=>{
+            this.buttonMusic("buttonpressed")
             currentGameData.speakerVolume = !currentGameData.speakerVolume
+            currentGameData.globalSound = !currentGameData.globalSound
+            this.Soundmanager.toggleAllSounds(currentGameData.globalSound);
             this.speakerButton.setScale(0.35)
             
         })
@@ -275,6 +288,7 @@ export default class UiContainer extends GameObjects.Container {
             if(currentGameData.speakerVolume){
                 this.speakerButton.setTexture("soundOn")
             }else{
+                
                 this.speakerButton.setTexture("soundOff")
             }
             this.speakerButton.setScale(0.4)
@@ -291,6 +305,7 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("infoIcon"),
         ]
         this.infoIconButton = new InteractiveBtn(this.scene, infoIconSprite, ()=>{
+            this.buttonMusic("buttonpressed")
             this.popupManager.showInfoPopup({})
         }, 8, true)
         this.infoIconButton.setScale(0.4)
@@ -316,6 +331,7 @@ export default class UiContainer extends GameObjects.Container {
         const outerCircle = this.scene.add.sprite(0, 0, "circleBg").setScale(0.45)
         const logoutButton = this.scene.add.sprite(0, 0, "closeButton").setScale(0.43).setInteractive()
         logoutButton.on("pointerdown",()=>{
+            this.buttonMusic("buttonpressed")
             logoutButton.setScale(0.4)
             this.popupManager.showLogoutPopup({})
         })
@@ -355,6 +371,7 @@ export default class UiContainer extends GameObjects.Container {
         }
     }
     increaseBet(){
+        this.buttonMusic("buttonpressed")
         currentGameData.currentBetIndex++;
         if (currentGameData.currentBetIndex >= initData.gameData.Bets.length) {
             currentGameData.currentBetIndex = initData.gameData.Bets.length - 1;
@@ -366,6 +383,7 @@ export default class UiContainer extends GameObjects.Container {
 
     }
     decreaseBet(){
+        this.buttonMusic("buttonpressed")
         if (!this.isSpinning) {
             currentGameData.currentBetIndex--;
             if (currentGameData.currentBetIndex < 0) {
@@ -384,10 +402,14 @@ export default class UiContainer extends GameObjects.Container {
             this.spinText.updateLabelText(`You Won ${ResultData.playerData.currentWining.toFixed(3)}!`)
         }else{
             this.spinText.updateLabelText("Better Luck Next Time")
+            if(ResultData.gameData.isFreeSpin || currentGameData.isAutoSpin){
+                this.scene.events.emit("freeSpin")
+            }
         }
     }
 
     redSmokeAnimation() {
+        this.Soundmanager.playSound("winMusic")
         // Add dark overlay background
         const overlay = this.scene.add.graphics();
         overlay.setDepth(9); // Make sure it's behind the smoke and text
@@ -532,6 +554,9 @@ export default class UiContainer extends GameObjects.Container {
         };
        
     }
+    buttonMusic(key: string){
+        this.Soundmanager.playSound("buttonpressed")
+    }
        
 }
 
@@ -619,4 +644,5 @@ class InteractiveBtn extends Phaser.GameObjects.Sprite {
             repeat: -1
         });
     }
+   
 }

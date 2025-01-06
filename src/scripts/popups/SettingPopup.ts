@@ -1,18 +1,20 @@
 import { Scene, GameObjects } from "phaser";
 import { gameConfig } from "../appConfig";
 import { currentGameData } from "../Globals";
+import SoundManager from "../SoundManager";
 
 export default class SettingPopup extends Phaser.GameObjects.Container {
     private soundRadio!: GameObjects.Sprite
     private musicRadio!: GameObjects.Sprite
     private turboRadio!: GameObjects.Sprite
+    SoundManager: SoundManager
     constructor(scene: Scene, data: any) {
         super(scene, 0, 0);
         this.createSettingBackground()
         this.soundToggle(currentGameData.soundMode)
         this.backgroudnMusicToggle(currentGameData.musicMode);
         this.turboModeToggle(currentGameData.turboMode)
-        
+        this.SoundManager = new SoundManager(scene)
     }
     createSettingBackground(){
         const settingBg = this.scene.add.sprite(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.5, "popupBgSprite").setScale(0.8);
@@ -21,6 +23,7 @@ export default class SettingPopup extends Phaser.GameObjects.Container {
         const outerCircle = this.scene.add.sprite(settingBg.x + settingBg.x/2 + 50, headingBg.y, "circleBg").setOrigin(0.5).setScale(0.6)
         const closeBtn = this.scene.add.sprite(outerCircle.x, outerCircle.y, "closeButton").setScale(0.6).setOrigin(0.5).setInteractive()
         closeBtn.on("pointerdown", ()=>{
+            this.buttonMusic("buttonpressed")
             closeBtn.setScale(0.5);
             this.scene.events.emit("closePopup")
         })
@@ -35,12 +38,18 @@ export default class SettingPopup extends Phaser.GameObjects.Container {
 
         soundCircle.on("pointerdown", ()=>{
             currentGameData.soundMode = !currentGameData.soundMode
+            currentGameData.globalSound = !currentGameData.globalSound
+            this.SoundManager.toggleAllSounds(currentGameData.globalSound);
             this.soundToggle(currentGameData.soundMode)
         })
         
         const bgMusicCircle = this.scene.add.sprite(backgroundMusicText.x + 210, backgroundMusicText.y, "circleBg").setScale(0.4).setOrigin(0.5).setInteractive()
         bgMusicCircle.on("pointerdown", ()=>{
             currentGameData.musicMode = !currentGameData.musicMode
+            //true music mode, //flase globalmode
+            // if(currentGameData.globalSound == currentGameData.musicMode){
+                this.SoundManager.setMusicEnabled(currentGameData.musicMode)
+            // }
             this.backgroudnMusicToggle(currentGameData.musicMode)
         })
 
@@ -91,5 +100,10 @@ export default class SettingPopup extends Phaser.GameObjects.Container {
         ).setScale(0.4).setOrigin(0.5)
 
         this.add(this.turboRadio)
+    }
+    buttonMusic(key: string){
+        if(currentGameData.globalSound){
+            this.SoundManager.playSound(key)
+        }
     }
 }

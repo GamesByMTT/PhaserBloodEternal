@@ -45,7 +45,8 @@ export const currentGameData = {
     musicMode: true,
     speakerVolume: true,
     turboMode: false,
-    isAutoSpin: true
+    isAutoSpin: false,
+    globalSound: true
 }
 
 export const initData = {

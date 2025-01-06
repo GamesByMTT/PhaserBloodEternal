@@ -5,6 +5,8 @@ import { PopupManager } from "../scripts/PopupManager";
 import Slots from "../scripts/Slots";
 import SoundManager from "../scripts/SoundManager";
 import { gameConfig } from "../scripts/appConfig";
+import { LineGenerator } from "../scripts/LineGenrater";
+import LineSymbols from "../scripts/LineSymbols";
 
 export default class MainScene extends Scene {
     Background!: GameObjects.Sprite
@@ -18,6 +20,8 @@ export default class MainScene extends Scene {
     candleFour!: GameObjects.Sprite
     candleFive!: GameObjects.Sprite
     reelBg!: GameObjects.Sprite
+    lineGenrator!: LineGenerator
+    lineSymbols!: LineSymbols
     uiContainer!: UiContainer
     private mainContainer!: Phaser.GameObjects.Container
     popupManager!: PopupManager
@@ -45,7 +49,8 @@ export default class MainScene extends Scene {
         this.logo = new Phaser.GameObjects.Sprite(this, width/2, height * 0.1, "bloodEternal").setOrigin(0.5).setScale(0.82);
         this.candles = new Phaser.GameObjects.Sprite(this, width * 0.95, height * 0.82, "candles").setOrigin(0.5).setScale(0.7);
         this.reelBg = new GameObjects.Sprite(this, width * 0.5, height * 0.471, "reelBg").setOrigin(0.5)
-       
+        this.soundManager.playSound("backgroundMusic");
+        this.setupFocusBlurEvents()
         const falmeAnim: Phaser.Types.Animations.AnimationFrame[] = []
         for (let i = 0; i < 64; i++) {
             falmeAnim.push({key: `flame${i}`})
@@ -118,11 +123,13 @@ export default class MainScene extends Scene {
             frameRate: 25,
             repeat: 0
         })
-        this.vampireMale = new Phaser.GameObjects.Sprite(this, gameConfig.scale.width * 0.38, gameConfig.scale.height * 0.24, 'maleVampire0').setOrigin(0.5).setScale(0.95);
+        this.vampireMale = new Phaser.GameObjects.Sprite(this, gameConfig.scale.width * 0.38, gameConfig.scale.height * 0.24, 'maleVampire0').setOrigin(0.5).setScale(0.95).setVisible(false);
         this.vampireMale.play('maleVampire')
-        
+       
         this.slots = new Slots(this, this.uiContainer, ()=> this.onResultCallBack(), this.soundManager)
-        this.mainContainer.add([this.slots, this.vampireMale])
+        this.lineGenrator = new LineGenerator(this, this.slots.slotSymbols[0][0].symbol.height, this.slots.slotSymbols[0][0].symbol.width + 10);
+        this.lineSymbols = new LineSymbols(this, this.slots.slotSymbols[0][0].symbol.height, this.slots.slotSymbols[0][0].symbol.width + 10, this.lineGenrator);
+        this.mainContainer.add([this.lineGenrator, this.slots, this.vampireMale])
         this.redReelCotainer()
     }
 
@@ -133,16 +140,22 @@ export default class MainScene extends Scene {
         this.purpleReelSprite.play("purple")
     }
     onSpinCallBack(){
-        const onSpinMusic = "onSpin"
-        this.soundManager.playSound(onSpinMusic)
+        this.soundManager.playSound("onSpin")
         this.slots.moveReel();
-        // this.lineGenerator.hideLines();
+        this.lineGenrator.hideLines();
     }
     onResultCallBack(){
-        const onSpinMusic = "onSpin"
         if(ResultData.playerData.currentWining == 0){
             this.uiContainer.onSpin(false);
         }
+        // this.lineGenrator.showLines(ResultData.gameData.linesToEmit)
+    }
+
+    linesToShow(index: number[]){
+        this.lineGenrator.showLines(index)
+    }
+    hideLines(){
+        this.lineGenrator.hideLines()
     }
 
     shutdown() {
@@ -164,6 +177,18 @@ export default class MainScene extends Scene {
                 this.slots.stopTween();
             }, 1000);
         }
+    }
+
+    private setupFocusBlurEvents() {
+        window.addEventListener('blur', () => {
+                this.soundManager.stopSound('backgroundMusic');
+        });
+
+        window.addEventListener('focus', () => {
+            if(currentGameData.musicMode){
+                this.soundManager.playSound('backgroundMusic');
+            }
+        });
     }
     
 }

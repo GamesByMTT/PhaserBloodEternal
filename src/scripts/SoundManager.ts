@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { Globals } from "./Globals";
+import { currentGameData, Globals } from "./Globals";
 
 export default class SoundManager{
     private scene : Phaser.Scene;
@@ -28,7 +28,10 @@ export default class SoundManager{
                     sound.userVolume = Phaser.Math.Clamp(volume, 0, 0.2)
                     this.applyVolumeToSound(sound)
                 }
-                if(key === "backgroundMusic"){
+                if(key === "winMusic"){
+                    sound.rate(1.5)
+                }
+                if(key === "backgroundMusic" || key === "onSpin"){
                     sound.loop(true)
                 }else{
                     sound.loop(false)
@@ -51,14 +54,33 @@ export default class SoundManager{
         }
     }
 
+    public toggleAllSounds(enable: boolean) {
+        this.soundEnabled = enable;
+        this.musicEnabled = enable;
+        if (!enable) {
+            // Stop all sounds
+            Object.entries(Globals.soundResources).forEach(([key, sound]) => {
+                sound.stop();
+            });
+        } else {
+            // if(enable === currentGameData.globalSound) return
+            // Resume background music if it was playing before
+            this.playSound("backgroundMusic");
+        }
+    }
+
     public setSoundEnabled(enable: boolean){
         this.soundEnabled = enable
+        console.log("enable", enable);
         if(!enable){
             Object.values(this.sounds).forEach(sounds => sounds.stop());
         }
     }
     public setMusicEnabled(enable: boolean){
         this.musicEnabled = enable
+        if(currentGameData.globalSound === enable){
+            return
+        }
         if(!enable){
             this.stopSound("backgroundMusic")
         }else{

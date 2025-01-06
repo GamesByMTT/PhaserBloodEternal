@@ -1,12 +1,15 @@
 import { Scene } from "phaser";
 import { gameConfig } from "../appConfig";
+import SoundManager from "../SoundManager";
+import { currentGameData } from "../Globals";
 
 export default class InfoPopup extends Phaser.GameObjects.Container {
     currentPageIndex: number = 0;
     pages: Phaser.GameObjects.Container[] = [];
+    SoundManager!: SoundManager
     constructor(scene: Scene, data: any) {
         super(scene, 0, 0);
-
+        this.SoundManager = new SoundManager(scene)
         // Create popup background
         // const bg = scene.add.rectangle( scene.scale.width / 2,scene.scale.height / 2, 600, 400,0x333333);
         const bg = scene.add.sprite( scene.scale.width / 2,scene.scale.height / 2, "popupBgSprite");
@@ -15,9 +18,9 @@ export default class InfoPopup extends Phaser.GameObjects.Container {
         const closeBtnText = scene.add.text(closeBtn.x, closeBtn.y,  'Return To Game',{ fontFamily: "Deutsch", fontSize: '27px', color: '#ffffff' }).setOrigin(0.5);
         closeBtn.setInteractive();
         closeBtn.on('pointerdown', () => {
+            this.buttonMusic("buttonpressed")
             closeBtn.setScale(0.7)
             scene.events.emit('closePopup');
-            // scene.game.events.emit('closePopup');
         });
         closeBtn.on("pointerup", ()=>{
             closeBtn.setScale(0.8)
@@ -33,9 +36,11 @@ export default class InfoPopup extends Phaser.GameObjects.Container {
         // Add your info content here
 
         previousButton.on("pointerdown",()=>{
+            this.buttonMusic("buttonpressed")
             this.goToPreviousPage()
         })
         nextButton.on("pointerdown", ()=>{
+            this.buttonMusic("buttonpressed")
             this.goToNextPage();
         })
 
@@ -219,6 +224,11 @@ export default class InfoPopup extends Phaser.GameObjects.Container {
             this.pages[this.currentPageIndex].setVisible(false);
             this.currentPageIndex--;
             this.pages[this.currentPageIndex].setVisible(true);
+        }
+    }
+    buttonMusic(key: string){
+        if(currentGameData.globalSound){
+            this.SoundManager.playSound(key)
         }
     }
 }
