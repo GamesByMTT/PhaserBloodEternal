@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { Globals, ResultData, initData, currentGameData } from "./scripts/Globals";
+import { Globals, ResultData, initData, currentGameData, gambleData, gambleResultData } from "./scripts/Globals";
 import MainLoader from "./view/MainLoader";
 import { PopupManager } from "./scripts/PopupManager";
 import { Scene } from "phaser";
@@ -30,7 +30,7 @@ export class SocketManager {
    this.socket = io(this.SocketUrl, {
       auth: {
         token: this.authToken,
-        gameId: "SL-BE",
+        gameId: "",
       },
     });
     this.setupEventListeners();
@@ -68,13 +68,14 @@ export class SocketManager {
             console.log(data, "ResultData")  
         }
         if(data.id == "gambleInitData"){
-          console.log(data.message, "gambleInitData");
+          // console.log(data.message, "gambleInitData");
           
         }
 
         if(data.id == "GambleResult"){
           console.log(data.message, "GambleResult");
-          
+          gambleResultData.gambleResponse = data.message;
+          Globals.emitter?.Call("gambleResponse")
         }
       });
     });
@@ -101,9 +102,7 @@ export class SocketManager {
       console.error("Reconnection failed.");
     });
   }
-  sendMessage(id : string, message: any) {
-    console.log(id, message);
-    
+  sendMessage(id : string, message: any) {   
     this.socket.emit(
       "message",
       JSON.stringify({ id: id, data: message })

@@ -1,6 +1,6 @@
 import { Scene, GameObjects } from "phaser";
 import { gameConfig } from "../appConfig";
-import { Globals, ResultData, currentGameData } from "../Globals";
+import { Globals, ResultData, currentGameData, gambleData, gambleResultData } from "../Globals";
 import { TextLabel } from "../TextLabel";
 
 
@@ -13,10 +13,12 @@ export default class GamblePopup extends Phaser.GameObjects.Container{
     fullAmountSprite!: GameObjects.Sprite
     halfAmountSprite!: GameObjects.Sprite
     coinAnim!: GameObjects.Sprite
+    failCount!: 0
     
     constructor(scene: Scene, data: any){
         super(scene, 0, 0);
-        
+        this.failCount = 0
+        currentGameData.gambleOpen = true;
         const bg = scene.add.sprite( scene.scale.width / 2,scene.scale.height / 2, "popupBgSprite");
         const headingBg = scene.add.sprite(gameConfig.scale.width * 0.5, bg.y - bg.height / 2 + 50, "headingBg").setScale(0.7)
         // Add content
@@ -87,36 +89,28 @@ export default class GamblePopup extends Phaser.GameObjects.Container{
         })
 
         headsButton.on("pointerdown", ()=>{
-          let data = {
-            selected: "HEADS", 
-            gambleOption:  "HALF",
-            id: "GAMBLERESULT"
-          }
-          Globals.Socket.sendMessage("GAMBLERESULT", data)
+          gambleData.selected = "HEAD"
+          Globals.Socket.sendMessage("GAMBLERESULT", gambleData)
           this.coinAnim.play("coinAnimation")
-          setTimeout(() => {
-            this.coinAnim.stop();
-            this.coinAnim.setTexture("coin8");
-        }, 2000); // Adjust time as needed
         })
 
         tailButton.on("pointerdown",()=>{
+            gambleData.selected = "TAIL"
+            Globals.Socket.sendMessage("GAMBLERESULT", gambleData)
             this.coinAnim.play("coinAnimation")
-            setTimeout(() => {
-              this.coinAnim.stop();
-              this.coinAnim.setTexture("coin0");
-          }, 2000); // Adjust time as needed
         })
 
         collectButtonBg.on("pointerdown",()=>{
+            this.failCount = 0
             this.scene.events.emit("closePopup")
         })
-
+        this.scene.events.on("gambleSceneResult", this.handleGambleResponse, this)
         this.add([bg, headingBg, title, headsButton, headText, tailButton, tailText, indsideRedBox, bankText,  betText, potentialWin, bankButtonBg,this.bankAmount, betButtonBg, this.betAmount, potentialButtonBg, this.winAmount, collectButtonBg, collecText, gambleAllText, gambleOuterCircle, gambleFiftyText, gambleFiftyOuterCircle,  this.fullAmountSprite, coinOuterCircle, this.coinAnim]);
     }
 
     toggleAmount(fullAmount: boolean, halfAmount: boolean){
         this.fullAmount = !this.fullAmount
+        gambleData.gambleOption = "ALL"
         let betAmountNumber = ResultData.playerData.currentWining
         betAmountNumber.toFixed(3)
         let finalAmount =  ResultData.playerData.currentWining * 2 
@@ -143,6 +137,7 @@ export default class GamblePopup extends Phaser.GameObjects.Container{
         if(this.halfAmountSprite){
             this.halfAmountSprite.destroy()
         }
+         gambleData.gambleOption = "HALF"
         let newBetAmount = ResultData.playerData.currentWining/2
         newBetAmount.toFixed(3)
         let finalAmount = newBetAmount * 2
@@ -151,5 +146,32 @@ export default class GamblePopup extends Phaser.GameObjects.Container{
         this.winAmount.updateLabelText(finalAmount.toString())
         this.halfAmountSprite = this.scene.add.sprite(gameConfig.scale.width * 0.75, gameConfig.scale.height * 0.59,  this.halfAmount ? "blueCircle": "blankCircle").setOrigin(0.5).setScale(0.3)
         this.add(this.halfAmountSprite)
+    }
+    handleGambleResponse(){
+        if(!gambleResultData.gambleResponse.playerWon){
+            this.failCount++
+        }
+        setTimeout(() => {
+            this.coinAnim.stop()
+            if(gambleResultData.gambleResponse.coin === "TAIL"){
+                this.coinAnim.setTexture("coin0");
+            }else{
+                this.coinAnim.setTexture("coin8");
+            }
+            if(gambleResultData.gambleResponse.currentWinning === 0 || this.failCount > 3){
+                this.failCount = 0
+                this.scene.events.emit("closePopup")
+            }
+        }, 2000);
+        this.bankAmount.updateLabelText((gambleResultData.gambleResponse.currentWinning).toFixed(3).toString())
+        let newBet
+        if(this.halfAmount){
+            newBet = gambleResultData.gambleResponse.currentWinning/2
+            this.betAmount.updateLabelText(newBet.toFixed(3).toString())
+            this.winAmount.updateLabelText((newBet*2).toFixed(3).toString())
+        }else{
+            this.betAmount.updateLabelText(gambleResultData.gambleResponse.currentWinning.toFixed(3).toString())
+            this.winAmount.updateLabelText((gambleResultData.gambleResponse.currentWinning * 2).toFixed(3).toString())
+        }
     }
 }

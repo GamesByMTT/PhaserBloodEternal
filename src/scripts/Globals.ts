@@ -46,8 +46,24 @@ export const currentGameData = {
     speakerVolume: true,
     turboMode: false,
     isAutoSpin: false,
-    globalSound: true
+    globalSound: true,
+    gambleOpen: false
 }
+
+export const gambleData = {
+    selected: "HEAD",
+    gambleOption: "ALL",
+    id: "GAMBLERESULT"
+}
+
+export const gambleResultData = {
+    gambleResponse:{
+        coin: "",
+        currentWinning: 0,
+        playerWon: false
+    }
+}
+
 
 export const initData = {
     gameData: {

@@ -152,6 +152,7 @@ export default class MainScene extends Scene {
     }
 
     linesToShow(index: number[]){
+        console.log(index, "index");
         this.lineGenrator.showLines(index)
     }
     hideLines(){
@@ -172,10 +173,12 @@ export default class MainScene extends Scene {
      */
     recievedMessage(msgType: string, msgParams: any) {
         if(msgType == "ResultData"){
-            
             setTimeout(() => {
                 this.slots.stopTween();
             }, 1000);
+        }
+        if(msgType == "gambleResponse"){
+            this.events.emit("gambleSceneResult")
         }
     }
 

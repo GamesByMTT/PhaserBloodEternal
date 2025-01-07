@@ -33,6 +33,7 @@ export default class Slots extends Phaser.GameObjects.Container{
 
     constructor(scene: Phaser.Scene, uiContainer: UiContainer, callback: ()=> void, SoundManager: SoundManager){
         super(scene)
+        this.scene.events.on("destroyWinRing5", this.destroyWinningSprites, this)
         // Create containers for smoke and win text that will be above the mask
         this.lineGenrator = new LineGenerator(scene, 0, 0)
         this.resultCallBack = callback;
@@ -54,7 +55,7 @@ export default class Slots extends Phaser.GameObjects.Container{
         this.spacingX = this.symbolWidth * 1.13
 
         this.scene.events.on("increamentDone", this.startRectangleEmit, this)
-        this.scene.events.on("destroyWinRing5", this.destroyWinningSprites, this)
+       
         
         this.spacingY = this.symbolHeight * 1.3
         const startPos = {
@@ -65,7 +66,7 @@ export default class Slots extends Phaser.GameObjects.Container{
         const visibleSymbol = 3
         const startIndex = 1
         const totalSymbolsPerReel = 16; 
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 3; i++) {
             this.winningFrames.push({ key: `newWinRing${i}` });
         }
                
@@ -124,11 +125,22 @@ export default class Slots extends Phaser.GameObjects.Container{
         mainScene.redReelSpite.setVisible(false);
         mainScene.purpleReelSprite.setVisible(false);
     }
+     //destroy winning SPrite winRing5 image
+    destroyWinningSprites() {
+        this.slotSymbols.forEach(reel => {           
+             reel.forEach(symbol => {
+                if (symbol.winningSprite) {
+                    symbol.winningSprite.destroy();
+                    symbol.winningSprite = null; // Important: reset the reference
+                }
+            });
+        });
+    }
     moveReel(){
+        this.scene.events.emit("destroyWinRing5")
         this.isSpinning = true;
         this.completedAnimations = 0;
         this.hasEmittedSmoke = false;
-        this.scene.events.emit("destroyWinRing5")
         this.backgroundAnimSprites.forEach(row => 
             row?.forEach(sprite => sprite?.destroy()));
         this.backgroundAnimSprites = [];
@@ -148,17 +160,7 @@ export default class Slots extends Phaser.GameObjects.Container{
         }, 100);
     }
 
-    //destroy winning SPrite winRing5 image
-    destroyWinningSprites() {
-        this.slotSymbols.forEach(reel => {           
-             reel.forEach(symbol => {
-                if (symbol.winningSprite) {
-                    symbol.winningSprite.destroy();
-                    symbol.winningSprite = null; // Important: reset the reference
-                }
-            });
-        });
-    }
+   
 
     startReelSpin(reelIndex: number) {    
         if (this.reelTween[reelIndex]) {
@@ -197,6 +199,7 @@ export default class Slots extends Phaser.GameObjects.Container{
         const mainScene = this.scene as MainScene;
         const { redPosition, purplePosition } = this.checkSpecialSymbols();
         for (let i = 0; i < this.reelContainers.length; i++) {
+            this.scene.events.emit("destroyWinRing5")
             const reel = this.reelContainers[i];
             let reelDelay = 200 * i;
             const targetY = 0;
@@ -330,7 +333,7 @@ export default class Slots extends Phaser.GameObjects.Container{
                 key: `newWinRing${elementId}`,
                 frames: this.winningFrames,
                 frameRate: 15,
-                repeat: 1
+                repeat: 0
             });
         }
         const targetContainer = this.slotSymbols[y][x].symbol.parentContainer;
@@ -355,17 +358,17 @@ export default class Slots extends Phaser.GameObjects.Container{
     
     startRectangleEmit() {
         let currentArrayIndex = 0;
+        let lineBlink = 0
         let blinkCount = 0; // Counter for the number of blinks
         const mainScene = this.scene as MainScene;
         const blinkNextArray = () => {
             if (this.isSpinning) {
                 return;
             }
-
             let rowArray = ResultData.gameData.symbolsToEmit[currentArrayIndex];
             currentArrayIndex = (currentArrayIndex + 1) % ResultData.gameData.symbolsToEmit.length; // Cycle through arrays
             let lineNumber: any = []
-            lineNumber.push(ResultData.gameData.linesToEmit[currentArrayIndex]);
+            lineNumber.push(ResultData.gameData.linesToEmit[lineBlink]);
             mainScene.hideLines()
             mainScene.linesToShow(lineNumber)
             if (rowArray) {
@@ -373,6 +376,7 @@ export default class Slots extends Phaser.GameObjects.Container{
                     if (this.isSpinning) {
                         return;
                     }
+                    lineBlink++
                     blinkCount++;
                     if ((ResultData.gameData.symbolsToEmit.length < 3) ? blinkCount < 4 : blinkCount < ResultData.gameData.symbolsToEmit.length) { // Blink 3 times in total
                         blinkNextArray();
@@ -443,7 +447,7 @@ export default class Slots extends Phaser.GameObjects.Container{
                 }
             });
         });
-        if(ResultData.gameData.isFreeSpin && ResultData.gameData.count > 0 || currentGameData.isAutoSpin){
+        if(ResultData.gameData.count > 0 || currentGameData.isAutoSpin){
             this.scene.events.emit("freeSpin");
         }
     }

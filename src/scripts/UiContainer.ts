@@ -154,6 +154,7 @@ export default class UiContainer extends GameObjects.Container {
     }
     //Spin button
     spinUI(spinCallBack: () => void){
+        currentGameData.gambleOpen = false
         const container = this.scene.add.container(gameConfig.scale.width * 0.67, gameConfig.scale.height * 0.94)
         const redCircle = this.scene.add.sprite(0, 0, "circleBg").setScale(0.78)
         const spinText = this.scene.add.text(0, 0, "Spin",{fontFamily: "Deutsch", fontSize: "35px", color:"#ffffff",}).setOrigin(0.5)
@@ -187,6 +188,7 @@ export default class UiContainer extends GameObjects.Container {
     }
 
     freeSpinStart(spinCallBack: () => void){
+        currentGameData.gambleOpen = false
         this.isSpinning = true;
         this.spinText.updateLabelText("");
         this.onSpin(true)
@@ -211,7 +213,9 @@ export default class UiContainer extends GameObjects.Container {
         ]
         this.doubleUPButton = new InteractiveBtn(this.scene, doubleUp, ()=>{
             this.buttonMusic("buttonpressed")
-            if(ResultData.playerData.currentWining > 0){
+            console.log(currentGameData.gambleOpen, "currentGameData.gambleOpen");
+            
+            if(ResultData.playerData.currentWining > 0 && !currentGameData.gambleOpen){
                 Globals.Socket?.sendMessage("GAMBLEINIT", { id: "GAMBLEINIT" });
                 this.popupManager.showGamblePopup({})
             }
@@ -410,6 +414,7 @@ export default class UiContainer extends GameObjects.Container {
 
     redSmokeAnimation() {
         this.Soundmanager.playSound("winMusic")
+        currentGameData.gambleOpen = false
         // Add dark overlay background
         const overlay = this.scene.add.graphics();
         overlay.setDepth(9); // Make sure it's behind the smoke and text
