@@ -163,6 +163,7 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("redCircle")
         ]
         this.spinButton = new InteractiveBtn(this.scene, spinTexture, ()=>{
+            console.log(this.isSpinning);
             if (this.isSpinning) return;
             this.buttonMusic("spinButton")
             this.startSpining(spinCallBack)
@@ -199,9 +200,9 @@ export default class UiContainer extends GameObjects.Container {
         });
         spinCallBack();
             // Reset the flag after some time or when spin completes
-        setTimeout(() => {
-            this.isSpinning = false;
-        }, 1200); // Adjust timeout as needed
+        // setTimeout(() => {
+        //     this.isSpinning = false;
+        // }, 1200); // Adjust timeout as needed
     }
     //doubleupUI
     doubleupUI(){
@@ -214,7 +215,6 @@ export default class UiContainer extends GameObjects.Container {
         this.doubleUPButton = new InteractiveBtn(this.scene, doubleUp, ()=>{
             this.buttonMusic("buttonpressed")
             console.log(currentGameData.gambleOpen, "currentGameData.gambleOpen");
-            
             if(ResultData.playerData.currentWining > 0 && !currentGameData.gambleOpen){
                 Globals.Socket?.sendMessage("GAMBLEINIT", { id: "GAMBLEINIT" });
                 this.popupManager.showGamblePopup({})
@@ -240,9 +240,15 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("blueCircle")
         ]
         this.autoPlayButton = new InteractiveBtn(this.scene, autoPlay, ()=>{
-            this.buttonMusic("buttonpressed")
-            currentGameData.isAutoSpin = !currentGameData.isAutoSpin
-            this.freeSpinStart(spinCallBack)
+            if(this.isSpinning){
+                this.isSpinning = false
+                currentGameData.isAutoSpin = !currentGameData.isAutoSpin
+                return
+            }else{
+                this.buttonMusic("buttonpressed")
+                currentGameData.isAutoSpin = !currentGameData.isAutoSpin
+                this.freeSpinStart(spinCallBack)
+            }
         }, 7, true);
         const autoPlayText = this.scene.add.text(0, 0, "Auto\nPlay",{fontFamily: "Deutsch", fontSize: "28px", color:"#ffffff", align:"center"}).setOrigin(0.5)
         this.autoPlayButton.setScale(0.9)
@@ -320,7 +326,6 @@ export default class UiContainer extends GameObjects.Container {
     bottomPanel(){
         const container = this.scene.add.container(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.85)
         const spritePanel = this.scene.add.sprite(0, 0, "borderBottom").setScale(1.1)
-        console.log(ResultData.playerData.Balance, "ResultData.playerData.Balance");
         const balanceText = this.scene.add.text(gameConfig.scale.width * 0.2, gameConfig.scale.height * 0.84, "Balance", {fontFamily: "Deutsch", fontSize: "30px", color: "#ffffff"})
         this.currentBalance = new TextLabel(this.scene, gameConfig.scale.width * 0.31, gameConfig.scale.height * 0.86, ResultData.playerData.Balance.toFixed(2), 35, "#ffffff", "Deutsch")
         this.spinText = new TextLabel(this.scene, gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.855, "Press Spin To Play", 35, "#ffffff", "CinzelDecorative")
@@ -355,7 +360,7 @@ export default class UiContainer extends GameObjects.Container {
             this.maxbetButton.disableInteractive()
             this.doubleUPButton.disableInteractive();
             this.infoIconButton.disableInteractive();
-            this.autoPlayButton.disableInteractive();
+            // this.autoPlayButton.disableInteractive();
             this.settingButton.disableInteractive();
             this.doubleUPButton.setTexture("greyCircle")
         }else{
@@ -370,7 +375,7 @@ export default class UiContainer extends GameObjects.Container {
             this.totalBetMinus.setInteractive();
             this.maxbetButton.setInteractive()
             this.infoIconButton.setInteractive();
-            this.autoPlayButton.setInteractive()
+            // this.autoPlayButton.setInteractive()
             this.settingButton.setInteractive();
         }
     }
@@ -440,7 +445,7 @@ export default class UiContainer extends GameObjects.Container {
         }
         const targetAmount = ResultData.playerData.currentWining;
         const smokeContainer = this.scene.add.container(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.5)
-        smokeContainer.setDepth(10);
+        smokeContainer.setDepth(15);
 
         const smokeSprite = this.scene.add.sprite(0, 0, 'RedSmoke0')
             .setScale(2)

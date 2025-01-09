@@ -20,7 +20,7 @@ if(!IS_DEV){
 } else{ 
     const data = {
         socketUrl: "http://localhost:5001",
-        authToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDg1MjhmYTI3YmY5MDI0NDNlYmExZiIsInVzZXJuYW1lIjoiYXJwaXQiLCJyb2xlIjoicGxheWVyIiwiaWF0IjoxNzM2MjQ4NTEzLCJleHAiOjE3MzY4NTMzMTN9.mLBKCa4oXaVqZCFi1_wELxc9JSp_nTP-K2ebiek1t_Y" 
+        authToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDg1MjhmYTI3YmY5MDI0NDNlYmExZiIsInVzZXJuYW1lIjoiYXJwaXQiLCJyb2xlIjoicGxheWVyIiwiaWF0IjoxNzM2Mzk3OTc2LCJleHAiOjE3MzcwMDI3NzZ9.Em5XZ2jAnNhcn9L9wNNv9FHPDV8HvbkNTjqw3axCvIE" 
     }
     Globals.Socket = new SocketManager();
     Globals.Socket.onToken(data);

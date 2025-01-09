@@ -30,6 +30,8 @@ export default class Slots extends Phaser.GameObjects.Container{
     private totalAnimations: number = 0;
     private hasEmittedSmoke: boolean = false;
     private backgroundAnimSprites: Phaser.GameObjects.Sprite[][] = [];
+    private vampireSprites: Phaser.GameObjects.Sprite[] = [];
+    private activeVampireSprites: Set<Phaser.GameObjects.Sprite> = new Set();
 
     constructor(scene: Phaser.Scene, uiContainer: UiContainer, callback: ()=> void, SoundManager: SoundManager){
         super(scene)
@@ -53,8 +55,14 @@ export default class Slots extends Phaser.GameObjects.Container{
         this.symbolWidth = symbolSprite.displayWidth;
         this.symbolHeight = symbolSprite.displayHeight;
         this.spacingX = this.symbolWidth * 1.13
-
+        // Bind the methods to maintain proper 'this' context
+        this.hideWiningLines = this.hideWiningLines.bind(this);
+        this.clearVampireSprites = this.clearVampireSprites.bind(this);
+        //Hide Wining Line on FreeSpin/AUtoSpin on every New Spin
+        this.scene.events.on("hideWiningLine", this.hideWiningLines, this)
         this.scene.events.on("increamentDone", this.startRectangleEmit, this)
+        // Clear vampire Animation after freeSpin count is 0
+        this.scene.events.on("clearVampireAnimation", this.clearVampireSprites, this)
        
         
         this.spacingY = this.symbolHeight * 1.3
@@ -122,22 +130,129 @@ export default class Slots extends Phaser.GameObjects.Container{
     }
     resetReelAnimations() {
         const mainScene = this.scene as MainScene;
+        mainScene.hideLines()
         mainScene.redReelSpite.setVisible(false);
         mainScene.purpleReelSprite.setVisible(false);
     }
      //destroy winning SPrite winRing5 image
-    destroyWinningSprites() {
+     destroyWinningSprites() {
+        // First, destroy any existing winning sprites
+        this.reelContainers.forEach((reelContainer, i) => {
+            reelContainer.getAll().forEach((gameObject) => {
+                if (gameObject.name && gameObject.name.startsWith('winRing_')) {
+                    gameObject.destroy();
+                }
+            });
+        });
+       
+        // Also clear the references in slotSymbols
         this.slotSymbols.forEach(reel => {           
-             reel.forEach(symbol => {
+            reel.forEach(symbol => {
                 if (symbol.winningSprite) {
                     symbol.winningSprite.destroy();
-                    symbol.winningSprite = null; // Important: reset the reference
+                    symbol.winningSprite = null;
                 }
             });
         });
     }
+
+    stopTween() {
+        const mainScene = this.scene as MainScene;
+        const { redPosition, purplePosition } = this.checkSpecialSymbols();
+        const { vampireFemalePositions, vampireMalePositions } = this.checkVampireCombinations();
+        console.log(vampireFemalePositions, vampireMalePositions, "VampirePosition");
+        
+        for (let i = 0; i < this.reelContainers.length; i++) {
+            this.scene.events.emit("destroyWinRing5");
+            const reel = this.reelContainers[i];
+            let reelDelay = 200 * i;
+            const targetY = 0;
+            const baseStopDuration = 3000; // Base duration for reel stop animation
+            // Calculate delays for special symbols            
+            if (redPosition >= 0 && i > redPosition) {
+                const additionalDelay = 6000;
+                reelDelay += additionalDelay;
+       
+                if (i === redPosition + 1) {
+                    // Schedule red reel animation to play after previous reel stops
+                    this.scene.time.delayedCall(reelDelay - additionalDelay + baseStopDuration, () => {
+                        mainScene.redReelSpite.setVisible(true);
+                        mainScene.redReelSpite.setPosition(
+                            this.slotSymbols[i][0].symbol.x,
+                            this.scene.cameras.main.height * 0.455
+                        );
+                        mainScene.redReelSpite.play('red');
+       
+                        // Hide red animation after it completes
+                        this.scene.time.delayedCall(3000, () => {
+                            mainScene.redReelSpite.setVisible(false);
+                        });
+                    });
+                }
+            }
+       
+            if (purplePosition >= 0 && i > purplePosition) {
+                const additionalDelay = 6000;
+                reelDelay += additionalDelay;
+       
+                if (i === purplePosition + 1) {
+                    // Schedule purple reel animation to play after previous reel stops
+                    this.scene.time.delayedCall(reelDelay - additionalDelay + baseStopDuration, () => {
+                        mainScene.purpleReelSprite.setVisible(true);
+                        mainScene.purpleReelSprite.setPosition(
+                            this.slotSymbols[i][0].symbol.x,
+                            this.scene.cameras.main.height * 0.455
+                        );
+                        mainScene.purpleReelSprite.play('purple');
+       
+                        // Hide purple animation after it completes
+                        this.scene.time.delayedCall(3000, () => {
+                            mainScene.purpleReelSprite.setVisible(false);
+                        });
+                    });
+                }
+            }
+       
+            this.scene.tweens.add({
+                targets: reel,
+                y: targetY,
+                duration: baseStopDuration,
+                ease: 'Cubic.easeOut',
+                delay: reelDelay,
+                onComplete: () => {
+                    this.SoundManager.stopSound("onSpin");
+                    if (this.reelTween[i]) {
+                        this.reelTween[i].stop();
+                    }
+                    // Add delay before showing background animations
+                    this.scene.time.delayedCall(500, () => {
+                        this.createBackgroundAnimations(i);
+                    });
+       
+                    if (i === this.reelContainers.length - 1) {
+                        this.scene.time.delayedCall(1000, () => {
+                            this.playWinAnimations();
+                            const newSprites = this.playVampireAnimations(vampireFemalePositions, vampireMalePositions);
+                            this.vampireSprites = [...newSprites]; // or just assign directly
+                            this.moveSlots = false;
+                        });
+                    }
+                }
+            });
+       
+            for (let j = 0; j < this.slotSymbols[i].length; j++) {
+                this.slotSymbols[i][j].endTween();
+            }
+        }
+        this.isSpinning = false;
+    }
+
     moveReel(){
-        this.scene.events.emit("destroyWinRing5")
+        // this.clearVampireSprites();
+        this.vampireSprites = [];
+        const mainScene = this.scene as MainScene;
+        mainScene.hideLines(); // Call hideLines directly here
+        this.destroyWinningSprites();
         this.isSpinning = true;
         this.completedAnimations = 0;
         this.hasEmittedSmoke = false;
@@ -159,8 +274,6 @@ export default class Slots extends Phaser.GameObjects.Container{
             }
         }, 100);
     }
-
-   
 
     startReelSpin(reelIndex: number) {    
         if (this.reelTween[reelIndex]) {
@@ -195,90 +308,127 @@ export default class Slots extends Phaser.GameObjects.Container{
         return { redPosition, purplePosition };
     }
 
-    stopTween() {
-        const mainScene = this.scene as MainScene;
-        const { redPosition, purplePosition } = this.checkSpecialSymbols();
-        for (let i = 0; i < this.reelContainers.length; i++) {
-            this.scene.events.emit("destroyWinRing5")
-            const reel = this.reelContainers[i];
-            let reelDelay = 200 * i;
-            const targetY = 0;
-            // If we have a special symbol, adjust the delays
-            if (redPosition >= 0 && i > redPosition) {
-                // Add extra delay for reels after red symbol
-                reelDelay += 3000;
-                // Show red animation on the next reel
-                if (i === redPosition + 1) {
-                    mainScene.redReelSpite.setVisible(true);
-                    mainScene.redReelSpite.setPosition(
-                        this.slotSymbols[i][0].symbol.x,
-                        this.scene.cameras.main.height * 0.455
-                    );
-                    mainScene.redReelSpite.play('red');
-                    // Hide the red animation after the delay
-                    this.scene.time.delayedCall(reelDelay + 1000, () => {
-                        mainScene.redReelSpite.setVisible(false);
-                    });
-                }
-            }
-            if (purplePosition >= 0 && i > purplePosition) {
-                // Add extra delay for reels after purple symbol
-                reelDelay += 3000;
-                // Show purple animation on the next reel
-                if (i === purplePosition + 1) {
-                    mainScene.purpleReelSprite.setVisible(true);
-                    mainScene.purpleReelSprite.setPosition(
-                        this.slotSymbols[i][0].symbol.x,
-                        this.scene.cameras.main.height * 0.455
-                    );
-                    mainScene.purpleReelSprite.play('purple');
-                    // Hide the purple animation after the delay
-                    this.scene.time.delayedCall(reelDelay + 1300, () => {
-                        mainScene.purpleReelSprite.setVisible(false);
-                    });
-                }
-            }
-            this.scene.tweens.add({
-                targets: reel,
-                y: targetY,
-                duration: 3000,
-                ease: 'Cubic.easeOut',
-                onComplete: () => {
-                    this.SoundManager.stopSound("onSpin")
-                    if (this.reelTween[i]) {
-
-                        this.reelTween[i].stop();
-                    }
-                    this.createBackgroundAnimations();
-                    if (i === this.reelContainers.length - 1) {
-                        this.playWinAnimations();
-                        this.moveSlots = false;
-                    }
-                },
-                delay: reelDelay
-            });
+    // playVampireAnimations(vampireFemalePositions: { x: number, y: number }[], vampireMalePositions: { x: number, y: number }[]) {
+    //     const mainScene = this.scene as MainScene;
+    //     const offsetX = 100; // Adjust this value to move animations right (increase for more right movement)
+    //     const OffsetY = 20
+    //     // Handle female vampire animations
+    //     vampireFemalePositions.forEach((pos, index) => {
+    //         if (index % 2 === 0) { // Only create animation for first position of each pair
+    //             const symbol = this.slotSymbols[pos.x][pos.y];
+    //             mainScene.vampireFemale.setVisible(true);
+    //             mainScene.vampireFemale.setPosition(
+    //                 symbol.symbol.x + offsetX, // Add offsetX here
+    //                 symbol.symbol.y - OffsetY
+    //             );
+    //             mainScene.vampireFemale.play('womanVampire');
+    //         }
+    //     });
         
-            for (let j = 0; j < this.slotSymbols[i].length; j++) {
-                this.slotSymbols[i][j].endTween();
+    //     // Handle male vampire animations
+    //     vampireMalePositions.forEach((pos, index) => {
+    //         if (index % 2 === 0) { // Only create animation for first position of each pair
+    //             const symbol = this.slotSymbols[pos.x][pos.y];
+    //             mainScene.vampireMale.setPosition(
+    //                 symbol.symbol.x + offsetX, // Add offsetX here
+    //                 symbol.symbol.y - OffsetY
+    //             );
+    //             mainScene.vampireMale.setVisible(true);
+    //             mainScene.vampireMale.play('maleVampire');
+    //         }
+    //     });
+    // }
+
+    playVampireAnimations(vampireFemalePositions: { x: number, y: number }[], vampireMalePositions: { x: number, y: number }[]): Phaser.GameObjects.Sprite[] {
+        const mainScene = this.scene as MainScene;
+        const offsetX = 100;
+        const offsetY = 20
+        const newVampireSprites: Phaser.GameObjects.Sprite[] = [];
+
+        // Handle female vampire animations
+        vampireFemalePositions.forEach((pos, index) => {
+            if (index % 2 === 0) {
+                const symbol = this.slotSymbols[pos.x][pos.y];
+                const vampireFemaleSprite = this.scene.add.sprite(
+                    symbol.symbol.x + offsetX,
+                    symbol.symbol.y - offsetY,
+                    'womanVampire0'
+                ).setDepth(12);
+        
+                vampireFemaleSprite.play('womanVampire');
+                newVampireSprites.push(vampireFemaleSprite);
+                this.activeVampireSprites.add(vampireFemaleSprite);
+        
+                // vampireFemaleSprite.on('animationcomplete', () => {
+                //     this.activeVampireSprites.delete(vampireFemaleSprite);
+                //     vampireFemaleSprite.destroy();
+                // });
+            }
+        });
+        
+        // Handle male vampire animations
+        vampireMalePositions.forEach((pos, index) => {
+            if (index % 2 === 0) {
+                const symbol = this.slotSymbols[pos.x][pos.y];
+                const vampireMaleSprite = this.scene.add.sprite(
+                    symbol.symbol.x + offsetX,
+                    symbol.symbol.y - offsetY,
+                    'maleVampire0'
+                ).setDepth(12);
+        
+                vampireMaleSprite.play('maleVampire');
+                newVampireSprites.push(vampireMaleSprite);
+                this.activeVampireSprites.add(vampireMaleSprite);
+        
+                // vampireMaleSprite.on('animationcomplete', () => {
+                //     this.activeVampireSprites.delete(vampireMaleSprite);
+                //     vampireMaleSprite.destroy();
+                // });
+            }
+        });
+        
+        return newVampireSprites;
+    }
+
+    checkVampireCombinations() {
+        let vampireFemalePositions: { x: number, y: number }[] = [];
+        let vampireMalePositions: { x: number, y: number }[] = [];
+        
+        // Check ResultReel for all vampire combinations
+        for (let i = 0; i < ResultData.gameData.ResultReel.length; i++) {
+            for (let j = 0; j < ResultData.gameData.ResultReel[i].length - 1; j++) {
+                const currentSymbol = ResultData.gameData.ResultReel[i][j];
+                const nextSymbol = ResultData.gameData.ResultReel[i][j + 1];
+        
+                // Check for female vampire combination (13 and 12)
+                if (currentSymbol === 13 && nextSymbol === 12) {
+                    vampireFemalePositions.push({ x: j, y: i });
+                    vampireFemalePositions.push({ x: j, y: i });
+                }
+                // Check for male vampire combination (11 and 14)
+                else if (currentSymbol === 11 && nextSymbol === 14) {
+                    vampireMalePositions.push({ x: j, y: i });
+                    vampireMalePositions.push({ x: j, y: i });
+                }
             }
         }
         
-        this.isSpinning = false;
+        return { vampireFemalePositions, vampireMalePositions };
     }
         
-
-    createBackgroundAnimations() {
-        // Clear existing background animations
-        this.backgroundAnimSprites.forEach(row => 
-            row?.forEach(sprite => sprite?.destroy()));
-        this.backgroundAnimSprites = [];
-        // Create new background animations where needed
-        for (let y = 0; y < ResultData.gameData.ResultReel.length; y++) {
-            this.backgroundAnimSprites[y] = [];
-            for (let x = 0; x < ResultData.gameData.ResultReel[y].length; x++) {
-                const elementId = ResultData.gameData.ResultReel[y][x];
+    createBackgroundAnimations(reelIndex?: number) {
+        if (reelIndex !== undefined) {
+            // Handle single reel
+            for (let y = 0; y < ResultData.gameData.ResultReel.length; y++) {
+                if (!this.backgroundAnimSprites[y]) {
+                    this.backgroundAnimSprites[y] = [];
+                }
+                const elementId = ResultData.gameData.ResultReel[y][reelIndex];
                 if (elementId === 12 || elementId === 13) {
-                    const symbol = this.slotSymbols[x][y];
+                    const symbol = this.slotSymbols[reelIndex][y];
+                    if (this.backgroundAnimSprites[y][reelIndex]) {
+                        this.backgroundAnimSprites[y][reelIndex].destroy();
+                    }
                     const bgSprite = this.scene.add.sprite(
                         symbol.symbol.x + 5,
                         symbol.symbol.y,
@@ -286,19 +436,22 @@ export default class Slots extends Phaser.GameObjects.Container{
                     );
                     
                     bgSprite.play('purpleSymbol');
-                    bgSprite.setDepth(1); // Set depth lower than symbols
-                    this.backgroundAnimSprites[y][x] = bgSprite;
+                    bgSprite.setDepth(1);
+                    this.backgroundAnimSprites[y][reelIndex] = bgSprite;
                     
-                    // Add to the background container
                     const mainScene = this.scene as MainScene;
                     mainScene.backgroundAnimContainer.add(bgSprite);
                 }
             }
+        } else {
+            // Clear existing background animations
+            this.backgroundAnimSprites.forEach(row => 
+                row?.forEach(sprite => sprite?.destroy()));
+            this.backgroundAnimSprites = [];
         }
     }
 
     playWinAnimations() {
-       
         this.resultCallBack();
         this.completedAnimations = 0;
         this.hasEmittedSmoke = false;
@@ -383,7 +536,14 @@ export default class Slots extends Phaser.GameObjects.Container{
                     } else {
                         // Show the sprite on all symbols after 3 blinks
                         this.showAllWinSprites();
+                        if(ResultData.gameData.count === 0){
+                            this.uiContainer.isSpinning = false
+                            console.log("clearing Vampire Sprites");
+                            this.scene.events.emit("clearVampireAnimation")
+                            // this.clearVampireSprites()
+                        }
                         mainScene.linesToShow(ResultData.gameData.linesToEmit)
+                        
                     }
                 });
             }
@@ -432,6 +592,7 @@ export default class Slots extends Phaser.GameObjects.Container{
         blink();
     }
     showAllWinSprites() {
+        this.destroyWinningSprites();
         ResultData.gameData.symbolsToEmit.forEach((rowArray: any) => {
             rowArray.forEach((row: any) => {
                 const [y, x] = row.split(",").map(Number);
@@ -448,8 +609,32 @@ export default class Slots extends Phaser.GameObjects.Container{
             });
         });
         if(ResultData.gameData.count > 0 || currentGameData.isAutoSpin){
-            this.scene.events.emit("freeSpin");
+            this.scene.events.emit("hideWiningLine")
+            this.scene.time.delayedCall(1000, ()=>{
+                this.scene.events.emit("freeSpin");
+            })
         }
+    }
+
+    hideWiningLines(){
+        const firstScene = this.scene as MainScene
+        firstScene.hideLines()
+    }
+
+    //clear Vampire Symbol
+    clearVampireSprites() {
+        console.log("inside clear VampireSprite");
+        
+        // Clear all existing vampire sprites
+        this.vampireSprites.forEach(sprite => {
+            if (sprite) {
+                console.log("inside Vampire Sprites");
+                this.activeVampireSprites.delete(sprite);
+                sprite.destroy();
+            }
+        });
+        this.vampireSprites = [];
+        this.activeVampireSprites.clear();
     }
 }
 

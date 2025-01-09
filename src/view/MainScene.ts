@@ -124,12 +124,15 @@ export default class MainScene extends Scene {
             repeat: 0
         })
         this.vampireMale = new Phaser.GameObjects.Sprite(this, gameConfig.scale.width * 0.38, gameConfig.scale.height * 0.24, 'maleVampire0').setOrigin(0.5).setScale(0.95).setVisible(false);
-        this.vampireMale.play('maleVampire')
-       
+        this.vampireMale.play('maleVampire');
+        // this.
+        this.vampireFemale = new Phaser.GameObjects.Sprite(this, gameConfig.scale.width * 0.38, gameConfig.scale.height * 0.24, 'womanVampire0').setOrigin(0.5).setScale(0.95).setVisible(false);
+        this.vampireFemale.play('womanVampire')
+
         this.slots = new Slots(this, this.uiContainer, ()=> this.onResultCallBack(), this.soundManager)
         this.lineGenrator = new LineGenerator(this, this.slots.slotSymbols[0][0].symbol.height, this.slots.slotSymbols[0][0].symbol.width + 10);
         this.lineSymbols = new LineSymbols(this, this.slots.slotSymbols[0][0].symbol.height, this.slots.slotSymbols[0][0].symbol.width + 10, this.lineGenrator);
-        this.mainContainer.add([this.lineGenrator, this.slots, this.vampireMale])
+        this.mainContainer.add([this.lineGenrator, this.slots, this.vampireMale,  this.vampireFemale])
         this.redReelCotainer()
     }
 
@@ -152,7 +155,6 @@ export default class MainScene extends Scene {
     }
 
     linesToShow(index: number[]){
-        console.log(index, "index");
         this.lineGenrator.showLines(index)
     }
     hideLines(){

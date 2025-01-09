@@ -10,7 +10,7 @@ export default class LineSymbols extends Phaser.GameObjects.Container{
     constructor(scene: Scene, yOf: number, xOf: number, lineGenrator: LineGenerator) {
         super(scene);
         this.lineGenrator = lineGenrator
-        for(let i = 0; i < initData.gameData.Lines.length; i++){
+        for(let i = 1; i < initData.gameData.Lines.length + 1; i++){
             let numberText = this.createNumber(scene, i);
             this.numArr.push(numberText);
             this.add(numberText);
@@ -27,11 +27,12 @@ export default class LineSymbols extends Phaser.GameObjects.Container{
         
         // Determine x position based on even or odd index
         if (index % 2 === 0) {
-            xPosition = -gameConfig.scale.width / 2.65;
-            yPosition = (index / 2) * 50 ;  // Staggered downwards for each even number
-        } else {
             xPosition = gameConfig.scale.width / 2.65;
             yPosition = ((index - 1) / 2) * 50;  // Staggered downwards for each odd number
+           
+        } else {
+            xPosition = -gameConfig.scale.width / 2.65;
+            yPosition = (index / 2) * 50 ;  // Staggered downwards for each even number
         }
     
         // Add a background sprite behind the number
@@ -41,7 +42,7 @@ export default class LineSymbols extends Phaser.GameObjects.Container{
             .setScale(0.13);  // Set depth lower than the text to make it behind
     
         // Create a text object for each number
-        let numberText = scene.add.text(xPosition, yPosition + 3, (index + 1).toString(), {
+        let numberText = scene.add.text(xPosition, yPosition + 3, (index).toString(), {
             font: "30px",
             color: "#ffffff",
             align: 'Center',            

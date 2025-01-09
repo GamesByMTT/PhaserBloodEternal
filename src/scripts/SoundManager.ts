@@ -71,7 +71,6 @@ export default class SoundManager{
 
     public setSoundEnabled(enable: boolean){
         this.soundEnabled = enable
-        console.log("enable", enable);
         if(!enable){
             Object.values(this.sounds).forEach(sounds => sounds.stop());
         }

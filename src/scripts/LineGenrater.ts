@@ -29,7 +29,7 @@ export class LineGenerator extends Phaser.GameObjects.Container {
     showLines(lines: number[]) {
         lines.forEach(lineIndex => {
             if (lineIndex >= 0 && lineIndex < this.lineArr.length) {
-                this.lineArr[lineIndex].showLine();
+                this.lineArr[lineIndex - 1].showLine();
             }
         });
     }
@@ -44,12 +44,10 @@ export class Lines extends Phaser.GameObjects.Container {
 
     constructor(scene: Phaser.Scene, index: number) {
         super(scene);
-
         const yLineOffset = 50;
         const points = initData.gameData.Lines[index];
-
         // Create line sprites between points
-        for (let i = 0; i < points.length - 1; i++) {
+        for (let i = 0; i < points.length; i++) {
             const startX = i * xOffset ;
             const startY = yOffset * points[i] - yLineOffset;
             const endX = (i + 1) * xOffset;
