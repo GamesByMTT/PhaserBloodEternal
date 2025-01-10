@@ -138,13 +138,11 @@ export default class UiContainer extends GameObjects.Container {
                 this.currentBet.updateLabelText(currentBet)
                 this.totalBetAmount.updateLabelText(betAmount.toString())
             }
-            
         }, 4, true)
         // Add pointerup event to reset text scale
         this.maxbetButton.on('pointerdown', () => {
             maxbetText.setScale(0.9);
         });
-
         // Add pointerout event to reset text scale
         this.maxbetButton.on('pointerup', () => {
             maxbetText.setScale(1);
@@ -163,7 +161,6 @@ export default class UiContainer extends GameObjects.Container {
             this.scene.textures.get("redCircle")
         ]
         this.spinButton = new InteractiveBtn(this.scene, spinTexture, ()=>{
-            console.log(this.isSpinning);
             if (this.isSpinning) return;
             this.buttonMusic("spinButton")
             this.startSpining(spinCallBack)
@@ -216,6 +213,8 @@ export default class UiContainer extends GameObjects.Container {
             this.buttonMusic("buttonpressed")
             console.log(currentGameData.gambleOpen, "currentGameData.gambleOpen");
             if(ResultData.playerData.currentWining > 0 && !currentGameData.gambleOpen){
+                currentGameData.gambleOpen = true;
+                this.scene.events.emit("gambleStateChanged", true);
                 Globals.Socket?.sendMessage("GAMBLEINIT", { id: "GAMBLEINIT" });
                 this.popupManager.showGamblePopup({})
             }

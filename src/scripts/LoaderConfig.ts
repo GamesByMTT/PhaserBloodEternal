@@ -273,6 +273,9 @@ export const LoaderConfig = {
     womanVampire12:"src/sprites/wVampire12.png",
     womanVampire13:"src/sprites/wVampire13.png",
 
+    //BloodSplash
+    bloodSplash: "src/sprites/bloodSplash.png",
+
 
     //Coin Anim
     coin0: "src/sprites/Coin0.png",

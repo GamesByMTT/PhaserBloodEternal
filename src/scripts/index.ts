@@ -4,6 +4,7 @@ import { Globals } from "./Globals";
 import { SceneHandler } from "./SceneHandler";
 import { gameConfig } from "./appConfig";
 
+
 window.postMessage("authToken", "*")
 
 if(!IS_DEV){    
@@ -20,7 +21,7 @@ if(!IS_DEV){
 } else{ 
     const data = {
         socketUrl: "http://localhost:5001",
-        authToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDg1MjhmYTI3YmY5MDI0NDNlYmExZiIsInVzZXJuYW1lIjoiYXJwaXQiLCJyb2xlIjoicGxheWVyIiwiaWF0IjoxNzM2Mzk3OTc2LCJleHAiOjE3MzcwMDI3NzZ9.Em5XZ2jAnNhcn9L9wNNv9FHPDV8HvbkNTjqw3axCvIE" 
+        authToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDg1MjhmYTI3YmY5MDI0NDNlYmExZiIsInVzZXJuYW1lIjoiYXJwaXQiLCJyb2xlIjoicGxheWVyIiwiaWF0IjoxNzM2NTA0MjQxLCJleHAiOjE3MzcxMDkwNDF9.UGq7dTnF4xd2B2g6_kQSXZJWkReVG5AZgner-yK95-A" 
     }
     Globals.Socket = new SocketManager();
     Globals.Socket.onToken(data);

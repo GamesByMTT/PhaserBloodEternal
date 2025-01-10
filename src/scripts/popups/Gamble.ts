@@ -102,6 +102,8 @@ export default class GamblePopup extends Phaser.GameObjects.Container{
 
         collectButtonBg.on("pointerdown",()=>{
             this.failCount = 0
+            currentGameData.gambleOpen = false;
+            this.scene.events.emit("gambleStateChanged", false);
             this.scene.events.emit("closePopup")
         })
         this.scene.events.on("gambleSceneResult", this.handleGambleResponse, this)
@@ -160,6 +162,8 @@ export default class GamblePopup extends Phaser.GameObjects.Container{
             }
             if(gambleResultData.gambleResponse.currentWinning === 0 || this.failCount > 3){
                 this.failCount = 0
+                currentGameData.gambleOpen = false;
+                this.scene.events.emit("gambleStateChanged", false);
                 this.scene.events.emit("closePopup")
             }
         }, 2000);
