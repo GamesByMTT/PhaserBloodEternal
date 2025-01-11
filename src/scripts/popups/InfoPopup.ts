@@ -1,4 +1,4 @@
-import { Scene } from "phaser";
+import { GameObjects, Scene } from "phaser";
 import { gameConfig } from "../appConfig";
 import SoundManager from "../SoundManager";
 import { currentGameData } from "../Globals";
@@ -7,23 +7,26 @@ export default class InfoPopup extends Phaser.GameObjects.Container {
     currentPageIndex: number = 0;
     pages: Phaser.GameObjects.Container[] = [];
     SoundManager!: SoundManager
+    closeBtn!: GameObjects.Sprite
     constructor(scene: Scene, data: any) {
         super(scene, 0, 0);
         this.SoundManager = new SoundManager(scene)
         // Create popup background
+        const bgLayer = scene.add.rectangle(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.5, gameConfig.scale.width, gameConfig.scale.height, 0x000000, 0.5).setOrigin(0.5).setInteractive()
         // const bg = scene.add.rectangle( scene.scale.width / 2,scene.scale.height / 2, 600, 400,0x333333);
+        bgLayer.on('pointerdown', ()=>{
+            this.closeInfoPopup()
+        })      
         const bg = scene.add.sprite( scene.scale.width / 2,scene.scale.height / 2, "popupBgSprite");
         
-        const closeBtn = scene.add.sprite(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.82, "returnToGame").setScale(0.8);
-        const closeBtnText = scene.add.text(closeBtn.x, closeBtn.y,  'Return To Game',{ fontFamily: "Deutsch", fontSize: '27px', color: '#ffffff' }).setOrigin(0.5);
-        closeBtn.setInteractive();
-        closeBtn.on('pointerdown', () => {
-            this.buttonMusic("buttonpressed")
-            closeBtn.setScale(0.7)
-            scene.events.emit('closePopup');
+        this.closeBtn = scene.add.sprite(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.82, "returnToGame").setScale(0.8);
+        const closeBtnText = scene.add.text(this.closeBtn.x, this.closeBtn.y,  'Return To Game',{ fontFamily: "Deutsch", fontSize: '27px', color: '#ffffff' }).setOrigin(0.5);
+        this.closeBtn.setInteractive();
+        this.closeBtn.on('pointerdown', () => {
+            this.closeInfoPopup()
         });
-        closeBtn.on("pointerup", ()=>{
-            closeBtn.setScale(0.8)
+        this.closeBtn.on("pointerup", ()=>{
+            this.closeBtn.setScale(0.8)
         })
         const previousButton = this.scene.add.sprite(gameConfig.scale.width * 0.24, gameConfig.scale.height * 0.75, "previousButton").setInteractive()
         const previousText = this.scene.add.text(previousButton.x, previousButton.y, "Previous", {fontFamily: "Deutsch", fontSize: '27px', color: '#ffffff'}).setOrigin(0.5);
@@ -44,10 +47,11 @@ export default class InfoPopup extends Phaser.GameObjects.Container {
             this.goToNextPage();
         })
 
-        this.add([bg, closeBtn, closeBtnText, headingBg, previousButton, previousText, nextButton, nextButtonText, bottomText]);
+        this.add([bgLayer, bg, this.closeBtn, closeBtnText, headingBg, previousButton, previousText, nextButton, nextButtonText, bottomText]);
         this.pages = []
         this.createPages()
     }
+
     createPages(){
         //Page One start
         this.pages[1] = this.scene.add.container(0, 0);
@@ -209,6 +213,12 @@ export default class InfoPopup extends Phaser.GameObjects.Container {
         this.pages.forEach((page, index) => {
             page.setVisible(index === this.currentPageIndex);
         });
+    }
+
+    closeInfoPopup(){
+        this.buttonMusic("buttonpressed")
+        this.closeBtn.setScale(0.7)
+        this.scene.events.emit('closePopup');
     }
 
     goToNextPage() {

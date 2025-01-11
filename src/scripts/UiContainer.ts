@@ -404,8 +404,46 @@ export default class UiContainer extends GameObjects.Container {
         }
     }
     updateData(){
-        this.currentWin.updateLabelText(ResultData.playerData.currentWining.toFixed(3).toString())
-        this.currentBalance.updateLabelText(ResultData.playerData.Balance.toFixed(2))
+ 
+        const startValue = parseFloat(this.currentBalance.text);
+        const endValue = ResultData.playerData.Balance;
+        // Create the tween
+        this.scene.tweens.add({
+            targets: { value: startValue },
+            value: endValue,
+            duration: 1000, // Duration in milliseconds
+            ease: 'Linear',
+            onUpdate: (tween) => {
+                // Update the text during the tween
+                const currentValue = tween.getValue();
+                this.currentBalance.updateLabelText(currentValue.toFixed(3).toString());
+            },
+            onComplete: () => {
+                // Ensure final value is exact
+                this.currentBalance.updateLabelText(endValue.toFixed(3).toString());
+            }
+        });
+
+        //Animation for win Text
+        const winStart = parseFloat(this.currentWin.text);
+        const winendValue = ResultData.playerData.currentWining;
+        // Create the tween
+        this.scene.tweens.add({
+            targets: { value: winStart },
+            value: winendValue,
+            duration: 500, // Duration in milliseconds
+            ease: 'Linear',
+            onUpdate: (tween) => {
+                // Update the text during the tween
+                const currentWinValue = tween.getValue();
+                this.currentWin.updateLabelText(currentWinValue.toFixed(3).toString());
+            },
+            onComplete: () => {
+                // Ensure final value is exact
+                this.currentWin.updateLabelText(winendValue.toFixed(3).toString());
+            }
+        });
+        // this.currentBalance.updateLabelText(ResultData.playerData.Balance.toFixed(2))
         if(ResultData.playerData.currentWining > 0){
             this.spinText.updateLabelText(`You Won ${ResultData.playerData.currentWining.toFixed(3)}!`)
         }else{
