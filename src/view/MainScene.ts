@@ -177,7 +177,7 @@ export default class MainScene extends Scene {
         if(msgType == "ResultData"){
             setTimeout(() => {
                 this.slots.stopTween();
-            }, 1000);
+            }, currentGameData.turboMode ? 500 : 1000);
         }
         if(msgType == "gambleResponse"){
             this.events.emit("gambleSceneResult")

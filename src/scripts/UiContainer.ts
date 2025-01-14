@@ -5,12 +5,14 @@ import { gameConfig } from "./appConfig";
 import { PopupManager } from "./PopupManager";
 import SoundManager from "./SoundManager";
 import { TextLabel } from "./TextLabel";
+import Slots from "./Slots";
 
 export default class UiContainer extends GameObjects.Container {
 
     Soundmanager: SoundManager
-    betPlus!: InteractiveBtn
-    betMinus!: InteractiveBtn
+    Slots!: Slots
+    // betPlus!: InteractiveBtn
+    // betMinus!: InteractiveBtn
     totalBetPlus!: InteractiveBtn
     totalBetMinus!: InteractiveBtn
     maxbetButton!: InteractiveBtn
@@ -28,6 +30,10 @@ export default class UiContainer extends GameObjects.Container {
     totalLine!: TextLabel
     spinText!: TextLabel
     public isSpinning: boolean = false;
+    turboSprite!: Phaser.GameObjects.Sprite;
+    turboMode: boolean = false
+    turboAnimation: Phaser.Types.Animations.AnimationFrame[] = []
+    stopButton!: Phaser.GameObjects.Sprite
 
     constructor(scene: Scene, spinCallBack: () => void, soundManager: SoundManager){
         super(scene);
@@ -35,11 +41,13 @@ export default class UiContainer extends GameObjects.Container {
         scene.add.existing(this)
         this.Soundmanager = soundManager
         this.isSpinning = false
-        this.betPerLineUI();
+        // this.betPerLineUI();
+        this.turboButton()
         this.totalBetUI();
         this.winUI();
         this.maxBetUI();
         this.spinUI(spinCallBack);
+        this.stopSpinButton()
         this.doubleupUI();
         this.autoPlayUI(spinCallBack);
         this.settingUI();
@@ -50,39 +58,73 @@ export default class UiContainer extends GameObjects.Container {
         this.scene.events.on("updateWin", this.updateData, this)
         this.scene.events.on("redSmokeAnimation", this.redSmokeAnimation, this)
         this.scene.events.on("freeSpin", () => this.freeSpinStart(spinCallBack), this)
+        this.scene.events.on("stopButtonStateChange", this.hideStopButton, this)
+    }
+    //turbo Button
+    turboButton(){
+        const container = this.scene.add.container(gameConfig.scale.width * 0.238, gameConfig.scale.height * 0.945)
+        this.turboSprite = this.scene.add.sprite(0, 0, "turboButton").setOrigin(0.5).setScale(0.58).setInteractive()
+       
+        this.turboSprite.on("pointerdown", ()=>{
+            this.turboSprite.setScale(0.55)
+            this.addFrames()
+            currentGameData.turboMode = !currentGameData.turboMode
+            if(currentGameData.turboMode){
+                this.turboSprite.play('turboSpin')
+            }else{
+                this.turboSprite.stop()
+                this.turboAnimation = []
+                this.turboSprite.setTexture('turboButton')
+            }
+        })
+        this.turboSprite.on("pointerup", ()=>{
+            this.turboSprite.setScale(0.58)
+        })
+        container.add([this.turboSprite])
+    }
+    addFrames(){
+        for(let p = 0; p < 19; p++){
+            this.turboAnimation.push({key: `turboSpin${p}`});
+        }
+        this.scene.anims.create({
+            key: 'turboSpin',
+            frames: this.turboAnimation,
+            frameRate: 40,
+            repeat: -1
+        })
     }
     //Bet Panel with plus and minus Buttton 
-    betPerLineUI(){
-        const container = this.scene.add.container(gameConfig.scale.width * 0.25, gameConfig.scale.height * 0.95)
-        const betPanel = this.scene.add.sprite(0, 0, "buttonBg").setScale(0.8).setOrigin(0.5)
-        const plusCircle = this.scene.add.sprite(80, 0, "circleBg").setScale(0.4)
-        const minusCircle = this.scene.add.sprite(-80, 0, "circleBg").setScale(0.4)
-        const plusButton = [
-            this.scene.textures.get("plusButton"),
-            this.scene.textures.get("plusButton")
-        ]
-        this.betPlus = new InteractiveBtn(this.scene, plusButton, ()=>{
-            if (!this.isSpinning) {
-                this.increaseBet()
-            }
-        }, 0, true)
-        this.betPlus.setPosition(80, 0).setScale(0.4)
-        const minusButton = [
-            this.scene.textures.get("minusButton"),
-            this.scene.textures.get("minusButton")
-        ]
-        this.betMinus = new InteractiveBtn(this.scene, minusButton, ()=>{
-            this.decreaseBet()
-        }, 1, true)
-        this.betMinus.setPosition(-80, 0).setScale(0.4)
-        this.currentBet = new TextLabel(this.scene, 0, -20, initData.gameData.Bets[currentGameData.currentBetIndex], 30, "#ffffff").setOrigin(0.5)
-        const betPerLineText = this.scene.add.text(0, 20, "Bet/Lines", { fontFamily: "Deutsch", fontSize: "25px", color: "#fff" }).setOrigin(0.5)
-        container.add([betPanel, plusCircle, minusCircle, this.currentBet, betPerLineText, this.betPlus, this.betMinus])
+    // betPerLineUI(){
+    //     const container = this.scene.add.container(gameConfig.scale.width * 0.25, gameConfig.scale.height * 0.95)
+    //     const betPanel = this.scene.add.sprite(0, 0, "buttonBg").setScale(0.8).setOrigin(0.5)
+    //     const plusCircle = this.scene.add.sprite(80, 0, "circleBg").setScale(0.4)
+    //     const minusCircle = this.scene.add.sprite(-80, 0, "circleBg").setScale(0.4)
+    //     const plusButton = [
+    //         this.scene.textures.get("plusButton"),
+    //         this.scene.textures.get("plusButton")
+    //     ]
+    //     this.betPlus = new InteractiveBtn(this.scene, plusButton, ()=>{
+    //         if (!this.isSpinning) {
+    //             this.increaseBet()
+    //         }
+    //     }, 0, true)
+    //     this.betPlus.setPosition(80, 0).setScale(0.4)
+    //     const minusButton = [
+    //         this.scene.textures.get("minusButton"),
+    //         this.scene.textures.get("minusButton")
+    //     ]
+    //     this.betMinus = new InteractiveBtn(this.scene, minusButton, ()=>{
+    //         this.decreaseBet()
+    //     }, 1, true)
+    //     this.betMinus.setPosition(-80, 0).setScale(0.4)
+    //     this.currentBet = new TextLabel(this.scene, 0, -20, initData.gameData.Bets[currentGameData.currentBetIndex], 30, "#ffffff").setOrigin(0.5)
+    //     const betPerLineText = this.scene.add.text(0, 20, "Bet/Lines", { fontFamily: "Deutsch", fontSize: "25px", color: "#fff" }).setOrigin(0.5)
+    //     container.add([betPanel, plusCircle, minusCircle, this.currentBet, betPerLineText, this.betPlus, this.betMinus])
+    // }
 
-    }
     //Total Bet UI with plus and minus button
     totalBetUI(){
-        const container = this.scene.add.container(gameConfig.scale.width * 0.38, gameConfig.scale.height * 0.95)
+        const container = this.scene.add.container(gameConfig.scale.width * 0.62, gameConfig.scale.height * 0.94)
         const totalBetPanel = this.scene.add.sprite(0, 0, "buttonBg").setScale(0.8). setOrigin(0.5)
         const plusCircle = this.scene.add.sprite(80, 0, "circleBg").setScale(0.4)
         const minusCircle = this.scene.add.sprite(-80, 0, "circleBg").setScale(0.4)
@@ -114,7 +156,6 @@ export default class UiContainer extends GameObjects.Container {
     winUI(){
         const container = this.scene.add.container(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.95)
         const winPanel = this.scene.add.sprite(0, -5, "winPanel").setScale(0.95);
-
         const winText = this.scene.add.text(0, 20, "Win", { fontFamily: "Deutsch", fontSize: "27px", color: "#fff" }).setOrigin(0.5)
         this.currentWin = new TextLabel(this.scene, 0, -25, ResultData.playerData.currentWining, 30, "#ffffff").setOrigin(0.5)
         container.add([winPanel, this.currentWin, winText])
@@ -122,7 +163,7 @@ export default class UiContainer extends GameObjects.Container {
     }
     //Max Bet Button to increase maximum bet
     maxBetUI(){
-        const container = this.scene.add.container(gameConfig.scale.width * 0.6, gameConfig.scale.height * 0.94);
+        const container = this.scene.add.container(gameConfig.scale.width * 0.32, gameConfig.scale.height * 0.942);
         const buttongBg = this.scene.add.sprite(0, 0, "circleBg").setScale(0.75)
         const maxbetText = this.scene.add.text(10, 2, "Max \nBet", {fontFamily: "Deutsch", fontSize: "30px", color:"#ffffff",}).setOrigin(0.5)
         const maxbetButton = [
@@ -150,10 +191,19 @@ export default class UiContainer extends GameObjects.Container {
         this.maxbetButton.setScale(0.9)
         container.add([buttongBg, this.maxbetButton, maxbetText])
     }
+    stopSpinButton(){
+        const container = this.scene.add.container(gameConfig.scale.width * 0.73, gameConfig.scale.height * 0.94)
+        this.stopButton = this.scene.add.sprite(0, 0, "stopButton").setInteractive().setScale(0.57).setVisible(false)
+        this.stopButton.on("pointerdown", ()=>{
+            console.log("Stop Button Called");
+           
+        })
+        container.add(this.stopButton)
+    }
     //Spin button
     spinUI(spinCallBack: () => void){
         currentGameData.gambleOpen = false
-        const container = this.scene.add.container(gameConfig.scale.width * 0.67, gameConfig.scale.height * 0.94)
+        const container = this.scene.add.container(gameConfig.scale.width * 0.73, gameConfig.scale.height * 0.94)
         const redCircle = this.scene.add.sprite(0, 0, "circleBg").setScale(0.78)
         const spinText = this.scene.add.text(0, 0, "Spin",{fontFamily: "Deutsch", fontSize: "35px", color:"#ffffff",}).setOrigin(0.5)
         const spinTexture = [
@@ -162,12 +212,34 @@ export default class UiContainer extends GameObjects.Container {
         ]
         this.spinButton = new InteractiveBtn(this.scene, spinTexture, ()=>{
             if (this.isSpinning) return;
+            this.stopButton.setVisible(true)
             this.buttonMusic("spinButton")
+            // 
+            const balance = parseFloat(this.currentBalance.text);
+            const balanceendValue = balance - (initData.gameData.Bets[currentGameData.currentBetIndex] * initData.gameData.Lines.length);
+            // Create the tween
+            this.scene.tweens.add({
+                targets: { value: balance },
+                value: balanceendValue,
+                duration: 500, // Duration in milliseconds
+                ease: 'Linear',
+                onUpdate: (tween) => {
+                    // Update the text during the tween
+                    const currentBalance = tween.getValue();
+                    this.currentBalance.updateLabelText(currentBalance.toFixed(3).toString());
+                },
+                onComplete: () => {
+                    // Ensure final value is exact
+                    this.currentBalance.updateLabelText(balanceendValue.toFixed(3).toString());
+                }
+            });
             this.startSpining(spinCallBack)
         }, 5, true)
         this.spinButton.setScale(0.75)
         container.add([redCircle, this.spinButton, spinText])
     }
+
+   
 
     startSpining(spinCallBack: () => void){
         this.isSpinning = true;
@@ -203,7 +275,7 @@ export default class UiContainer extends GameObjects.Container {
     }
     //doubleupUI
     doubleupUI(){
-        const container = this.scene.add.container(gameConfig.scale.width * 0.74, gameConfig.scale.height * 0.94)
+        const container = this.scene.add.container(gameConfig.scale.width * 0.81, gameConfig.scale.height * 0.94)
         const outerCircle = this.scene.add.sprite(0, 0, "circleBg").setScale(0.75)
         const doubleUp = [
             this.scene.textures.get("greyCircle"),
@@ -232,7 +304,7 @@ export default class UiContainer extends GameObjects.Container {
     }
     //Auto Play Button UI
     autoPlayUI(spinCallBack: () => void){
-        const container = this.scene.add.container(gameConfig.scale.width * 0.81, gameConfig.scale.height * 0.94)
+        const container = this.scene.add.container(gameConfig.scale.width * 0.4, gameConfig.scale.height * 0.942)
         const outerCircle = this.scene.add.sprite(0, 0, "circleBg").setScale(0.75)
         const autoPlay = [
             this.scene.textures.get("blueCircle"),
@@ -351,8 +423,8 @@ export default class UiContainer extends GameObjects.Container {
     }
     onSpin(spin: boolean){
         if(spin){
-            this.betPlus.disableInteractive()
-            this.betMinus.disableInteractive()
+            // this.betPlus.disableInteractive()
+            // this.betMinus.disableInteractive()
             this.spinButton.disableInteractive();
             this.totalBetPlus.disableInteractive();
             this.totalBetMinus.disableInteractive();
@@ -367,8 +439,9 @@ export default class UiContainer extends GameObjects.Container {
                 this.doubleUPButton.setTexture("blueCircle")
                 this.doubleUPButton.setInteractive()
             }
-            this.betPlus.setInteractive()
-            this.betMinus.setInteractive()
+            // this.betPlus.setInteractive()
+            // this.betMinus.setInteractive()
+            this.stopButton.setVisible(false)
             this.spinButton.setInteractive();
             this.totalBetPlus.setInteractive();
             this.totalBetMinus.setInteractive();
@@ -403,8 +476,10 @@ export default class UiContainer extends GameObjects.Container {
             this.totalBetAmount.updateLabelText(betAmount.toString());
         }
     }
+    hideStopButton(){
+        this.stopButton.setVisible(false)
+    }
     updateData(){
- 
         const startValue = parseFloat(this.currentBalance.text);
         const endValue = ResultData.playerData.Balance;
         // Create the tween
@@ -419,7 +494,6 @@ export default class UiContainer extends GameObjects.Container {
                 this.currentBalance.updateLabelText(currentValue.toFixed(3).toString());
             },
             onComplete: () => {
-                // Ensure final value is exact
                 this.currentBalance.updateLabelText(endValue.toFixed(3).toString());
             }
         });

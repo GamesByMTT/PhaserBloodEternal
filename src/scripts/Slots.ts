@@ -169,12 +169,12 @@ export default class Slots extends Phaser.GameObjects.Container{
         for (let i = 0; i < this.reelContainers.length; i++) {
             this.scene.events.emit("destroyWinRing5");
             const reel = this.reelContainers[i];
-            let reelDelay = 200 * i;
+            let reelDelay = currentGameData.turboMode ? 50 * i : 200 * i;
             const targetY = 0;
-            const baseStopDuration = 3000; // Base duration for reel stop animation
+            const baseStopDuration = currentGameData.turboMode ? 500: 3000; // Base duration for reel stop animation
             // Calculate delays for special symbols            
             if (redPosition >= 0 && i > redPosition) {
-                const additionalDelay = 6000;
+                const additionalDelay = currentGameData.turboMode ? 500 : 6000;
                 reelDelay += additionalDelay;
        
                 if (i === redPosition + 1) {
@@ -188,7 +188,7 @@ export default class Slots extends Phaser.GameObjects.Container{
                         mainScene.redReelSpite.play('red');
        
                         // Hide red animation after it completes
-                        this.scene.time.delayedCall(3000, () => {
+                        this.scene.time.delayedCall(currentGameData.turboMode ? 500 : 3000, () => {
                             mainScene.redReelSpite.setVisible(false);
                         });
                     });
@@ -196,7 +196,7 @@ export default class Slots extends Phaser.GameObjects.Container{
             }
        
             if (purplePosition >= 0 && i > purplePosition) {
-                const additionalDelay = 6000;
+                const additionalDelay = currentGameData.turboMode ? 500 : 6000;
                 reelDelay += additionalDelay;
        
                 if (i === purplePosition + 1) {
@@ -210,7 +210,7 @@ export default class Slots extends Phaser.GameObjects.Container{
                         mainScene.purpleReelSprite.play('purple');
        
                         // Hide purple animation after it completes
-                        this.scene.time.delayedCall(3000, () => {
+                        this.scene.time.delayedCall(currentGameData.turboMode ? 1000 : 3000, () => {
                             mainScene.purpleReelSprite.setVisible(false);
                         });
                     });
@@ -234,7 +234,7 @@ export default class Slots extends Phaser.GameObjects.Container{
                     });
        
                     if (i === this.reelContainers.length - 1) {
-                        this.scene.time.delayedCall(1000, () => {
+                        this.scene.time.delayedCall(currentGameData.turboMode ? 500 : 1000, () => {
                             this.playWinAnimations();
                             const newSprites = this.playVampireAnimations(vampireFemalePositions, vampireMalePositions);
                             this.vampireSprites = [...newSprites]; // or just assign directly
@@ -250,6 +250,63 @@ export default class Slots extends Phaser.GameObjects.Container{
             }
         }
         this.isSpinning = false;
+    }
+
+    stopReelsImmediately() {
+        // Stop all existing tweens
+        this.reelTween.forEach(tween => {
+            if (tween) {
+                tween.stop();
+            }
+        });
+        
+        // Clear vampire sprites and animations
+        this.clearVampireSprites();
+        this.resetReelAnimations();
+        
+        // Stop any ongoing animations
+        this.isSpinning = false;
+        this.completedAnimations = 0;
+        this.hasEmittedSmoke = false;
+        
+        // Clear background animations
+        this.backgroundAnimSprites.forEach(row => 
+            row?.forEach(sprite => sprite?.destroy()));
+        this.backgroundAnimSprites = [];
+        
+        // Immediately set final positions for all reels
+        for (let i = 0; i < this.reelContainers.length; i++) {
+            const reel = this.reelContainers[i];
+            // Set final position immediately
+            reel.setPosition(reel.x, 0);
+        
+            // Update symbols to show final result
+            for (let j = 0; j < 3; j++) { // Only update visible symbols
+                if (this.slotSymbols[i][j]) {
+                    const elementId = ResultData.gameData.ResultReel[j][i];
+                    const textureKey = `slots${elementId}_0`;
+                    this.slotSymbols[i][j].symbol.setTexture(textureKey);
+                }
+            }
+        }
+        
+        // Stop spin sound
+        this.SoundManager.stopSound("onSpin");
+        
+        // Create background animations for final state
+        for (let i = 0; i < this.reelContainers.length; i++) {
+            this.createBackgroundAnimations(i);
+        }
+        
+        // Play final animations
+        this.scene.time.delayedCall(100, () => {
+            this.playWinAnimations();
+            const { vampireFemalePositions, vampireMalePositions } = this.checkVampireCombinations();
+            const newSprites = this.playVampireAnimations(vampireFemalePositions, vampireMalePositions);
+            this.vampireSprites = [...newSprites];
+            this.handleBloodSplash();
+            this.moveSlots = false;
+        });
     }
 
     moveReel(){
@@ -303,7 +360,7 @@ export default class Slots extends Phaser.GameObjects.Container{
         this.reelTween[reelIndex] = this.scene.tweens.add({
             targets: reel,
             y: `+=${spinDistance}`,
-            duration: 400,
+            duration: currentGameData.turboMode ? 200 : 400,
             ease: 'Linear',
             repeat: -1,
             onComplete:() =>{
@@ -781,5 +838,6 @@ class Symbols{
         }
         // Stop moving and start tweening the sprite's position
         this.startMoving = false; 
+        this.scene.events.emit("stopButtonStateChange");
     }
 }

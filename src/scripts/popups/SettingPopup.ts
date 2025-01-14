@@ -13,7 +13,7 @@ export default class SettingPopup extends Phaser.GameObjects.Container {
         this.createSettingBackground()
         this.soundToggle(currentGameData.soundMode)
         this.backgroudnMusicToggle(currentGameData.musicMode);
-        this.turboModeToggle(currentGameData.turboMode)
+        // this.turboModeToggle(currentGameData.turboMode)
         this.SoundManager = new SoundManager(scene)
     }
     createSettingBackground(){
@@ -33,7 +33,7 @@ export default class SettingPopup extends Phaser.GameObjects.Container {
 
         const soundFxText = this.scene.add.text(gameConfig.scale.width * 0.5 - 70, gameConfig.scale.height * 0.4, "Sound Fx", {fontFamily: "Deutsch", fontSize: "40px", color: "#ffffff", align:"right"}).setOrigin(0.5)
         const backgroundMusicText = this.scene.add.text(gameConfig.scale.width * 0.5 - 70, gameConfig.scale.height * 0.5, "Background Music", {fontFamily: "Deutsch", fontSize: "40px", color: "#ffffff", align:"right"}).setOrigin(0.5)
-        const turboModeText = this.scene.add.text(gameConfig.scale.width * 0.5 - 70, gameConfig.scale.height * 0.6, "Turbo Mode",{fontFamily: "Deutsch", fontSize:"40px", color: "#ffffff", align:"right"}).setOrigin(0.5)
+        // const turboModeText = this.scene.add.text(gameConfig.scale.width * 0.5 - 70, gameConfig.scale.height * 0.6, "Turbo Mode",{fontFamily: "Deutsch", fontSize:"40px", color: "#ffffff", align:"right"}).setOrigin(0.5)
         const soundCircle = this.scene.add.sprite(soundFxText.x + 210, soundFxText.y, "circleBg").setScale(0.4).setOrigin(0.5).setInteractive()
 
         soundCircle.on("pointerdown", ()=>{
@@ -53,12 +53,12 @@ export default class SettingPopup extends Phaser.GameObjects.Container {
             this.backgroudnMusicToggle(currentGameData.musicMode)
         })
 
-        const turboMode = this.scene.add.sprite(turboModeText.x + 210, turboModeText.y, "circleBg").setScale(0.4).setOrigin(0.5).setInteractive()
-        turboMode.on("pointerdown", ()=>{
-            currentGameData.turboMode = !currentGameData.turboMode
-            this.turboModeToggle(currentGameData.turboMode)
-        })
-        this.add([settingBg, headingBg, headingText, outerCircle, soundFxText, soundCircle, backgroundMusicText, bgMusicCircle, turboModeText, turboMode, closeBtn])
+        // const turboMode = this.scene.add.sprite(turboModeText.x + 210, turboModeText.y, "circleBg").setScale(0.4).setOrigin(0.5).setInteractive()
+        // turboMode.on("pointerdown", ()=>{
+        //     currentGameData.turboMode = !currentGameData.turboMode
+        //     this.turboModeToggle(currentGameData.turboMode)
+        // })
+        this.add([settingBg, headingBg, headingText, outerCircle, soundFxText, soundCircle, backgroundMusicText, bgMusicCircle, closeBtn])
     }
     soundToggle(soundMode: boolean) {
         // Remove existing radio button if it exists
@@ -89,18 +89,18 @@ export default class SettingPopup extends Phaser.GameObjects.Container {
         this.add(this.musicRadio);
     }
 
-    turboModeToggle(turboMode: boolean){
-        if(this.turboRadio){
-            this.turboRadio.destroy()
-        }
-        this.turboRadio = this.scene.add.sprite(
-            gameConfig.scale.width * 0.5 + 140,
-            gameConfig.scale.height * 0.6,
-            turboMode ? "blueCircle": "blankCircle"
-        ).setScale(0.4).setOrigin(0.5)
+    // turboModeToggle(turboMode: boolean){
+    //     if(this.turboRadio){
+    //         this.turboRadio.destroy()
+    //     }
+    //     this.turboRadio = this.scene.add.sprite(
+    //         gameConfig.scale.width * 0.5 + 140,
+    //         gameConfig.scale.height * 0.6,
+    //         turboMode ? "blueCircle": "blankCircle"
+    //     ).setScale(0.4).setOrigin(0.5)
 
-        this.add(this.turboRadio)
-    }
+    //     this.add(this.turboRadio)
+    // }
     buttonMusic(key: string){
         if(currentGameData.globalSound){
             this.SoundManager.playSound(key)

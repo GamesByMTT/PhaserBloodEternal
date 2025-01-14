@@ -275,7 +275,28 @@ export const LoaderConfig = {
 
     //BloodSplash
     bloodSplash: "src/sprites/bloodSplash.png",
+    turboButton: "src/sprites/turboButton.png",
+    stopButton: "src/sprites/stopSpin.png",
 
+    turboSpin0: "src/sprites/turboSpin0.png",
+    turboSpin1: "src/sprites/turboSpin1.png",
+    turboSpin2: "src/sprites/turboSpin2.png",
+    turboSpin3: "src/sprites/turboSpin3.png",
+    turboSpin4: "src/sprites/turboSpin4.png",
+    turboSpin5: "src/sprites/turboSpin5.png",
+    turboSpin6: "src/sprites/turboSpin6.png",
+    turboSpin7: "src/sprites/turboSpin7.png",
+    turboSpin8: "src/sprites/turboSpin8.png",
+    turboSpin9: "src/sprites/turboSpin9.png",
+    turboSpin10: "src/sprites/turboSpin10.png",
+    turboSpin11: "src/sprites/turboSpin11.png",
+    turboSpin12: "src/sprites/turboSpin12.png",
+    turboSpin13: "src/sprites/turboSpin13.png",
+    turboSpin14: "src/sprites/turboSpin14.png",
+    turboSpin15: "src/sprites/turboSpin15.png",
+    turboSpin16: "src/sprites/turboSpin16.png",
+    turboSpin17: "src/sprites/turboSpin17.png",
+    turboSpin18: "src/sprites/turboSpin18.png",
 
     //Coin Anim
     coin0: "src/sprites/Coin0.png",
