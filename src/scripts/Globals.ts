@@ -47,7 +47,8 @@ export const currentGameData = {
     turboMode: false,
     isAutoSpin: false,
     globalSound: true,
-    gambleOpen: false
+    gambleOpen: false,
+    stopButtonEnabled: false
 }
 
 export const gambleData = {

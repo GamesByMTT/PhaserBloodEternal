@@ -176,7 +176,7 @@ export default class UiContainer extends GameObjects.Container {
                 currentGameData.currentBetIndex = initData.gameData.Bets.length - 1;
                 const currentBet = initData.gameData.Bets[currentGameData.currentBetIndex];
                 const betAmount = initData.gameData.Bets[currentGameData.currentBetIndex] * initData.gameData.Lines.length
-                this.currentBet.updateLabelText(currentBet)
+                // this.currentBet.updateLabelText(currentBet)
                 this.totalBetAmount.updateLabelText(betAmount.toString())
             }
         }, 4, true)
@@ -195,8 +195,8 @@ export default class UiContainer extends GameObjects.Container {
         const container = this.scene.add.container(gameConfig.scale.width * 0.73, gameConfig.scale.height * 0.94)
         this.stopButton = this.scene.add.sprite(0, 0, "stopButton").setInteractive().setScale(0.57).setVisible(false)
         this.stopButton.on("pointerdown", ()=>{
-            console.log("Stop Button Called");
-           
+            currentGameData.stopButtonEnabled = !currentGameData.stopButtonEnabled
+            this.scene.events.emit("stopImmediately")
         })
         container.add(this.stopButton)
     }
@@ -283,7 +283,6 @@ export default class UiContainer extends GameObjects.Container {
         ]
         this.doubleUPButton = new InteractiveBtn(this.scene, doubleUp, ()=>{
             this.buttonMusic("buttonpressed")
-            console.log(currentGameData.gambleOpen, "currentGameData.gambleOpen");
             if(ResultData.playerData.currentWining > 0 && !currentGameData.gambleOpen){
                 currentGameData.gambleOpen = true;
                 this.scene.events.emit("gambleStateChanged", true);
@@ -477,7 +476,9 @@ export default class UiContainer extends GameObjects.Container {
         }
     }
     hideStopButton(){
-        this.stopButton.setVisible(false)
+        setTimeout(() => {
+            this.stopButton.setVisible(false)
+        }, 500);
     }
     updateData(){
         const startValue = parseFloat(this.currentBalance.text);

@@ -12,6 +12,7 @@ export class PopupManager {
     private popupContainer: Phaser.GameObjects.Container;
     private overlay: Phaser.GameObjects.Rectangle;
     private currentPopup: InfoPopup | SettingPopup | LogoutPopup | Disconnection | null = null;
+    private gamblePopup: GamblePopup | null = null;
      
     constructor(scene: Scene) {
         this.scene = scene;
@@ -65,6 +66,10 @@ export class PopupManager {
     }
 
     showGamblePopup(data: any){
+        if (this.gamblePopup) {
+            this.gamblePopup.destroy();
+            this.gamblePopup = null;
+        }
         this.closeCurrentPopup();
         this.currentPopup = new GamblePopup(this.scene, data);
         this.popupContainer.add(this.currentPopup)

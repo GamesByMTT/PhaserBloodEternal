@@ -66,6 +66,7 @@ export default class Slots extends Phaser.GameObjects.Container{
         this.scene.events.on("increamentDone", this.startRectangleEmit, this)
         // Clear vampire Animation after freeSpin count is 0
         this.scene.events.on("clearVampireAnimation", this.clearVampireSprites, this)
+        this.scene.events.on("stopImmediately", this.stopReelsImmediately, this)
         this.scene.events.on("gambleStateChanged", (isOpen: boolean) => {
             this.handleGambleStateChange(isOpen);
         });
@@ -162,6 +163,7 @@ export default class Slots extends Phaser.GameObjects.Container{
     }
 
     stopTween() {
+        if(currentGameData.stopButtonEnabled) return;
         const mainScene = this.scene as MainScene;
         const { redPosition, purplePosition } = this.checkSpecialSymbols();
         const { vampireFemalePositions, vampireMalePositions } = this.checkVampireCombinations();
@@ -169,12 +171,12 @@ export default class Slots extends Phaser.GameObjects.Container{
         for (let i = 0; i < this.reelContainers.length; i++) {
             this.scene.events.emit("destroyWinRing5");
             const reel = this.reelContainers[i];
-            let reelDelay = currentGameData.turboMode ? 50 * i : 200 * i;
+            let reelDelay = currentGameData.turboMode ? 1 : 200 * i;
             const targetY = 0;
-            const baseStopDuration = currentGameData.turboMode ? 500: 3000; // Base duration for reel stop animation
+            const baseStopDuration = currentGameData.turboMode ? 1: 3000; // Base duration for reel stop animation
             // Calculate delays for special symbols            
             if (redPosition >= 0 && i > redPosition) {
-                const additionalDelay = currentGameData.turboMode ? 500 : 6000;
+                const additionalDelay = currentGameData.turboMode ? 1 : 6000;
                 reelDelay += additionalDelay;
        
                 if (i === redPosition + 1) {
@@ -310,8 +312,8 @@ export default class Slots extends Phaser.GameObjects.Container{
     }
 
     moveReel(){
-        // this.clearVampireSprites();
-        // this.vampireSprites = [];
+        //conditon to enable the double button
+        currentGameData.stopButtonEnabled = false
         const mainScene = this.scene as MainScene;
         mainScene.hideLines(); // Call hideLines directly here
         if (ResultData.gameData.bloodSplash) {

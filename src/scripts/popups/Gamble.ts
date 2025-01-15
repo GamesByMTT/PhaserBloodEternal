@@ -14,6 +14,9 @@ export default class GamblePopup extends Phaser.GameObjects.Container{
     halfAmountSprite!: GameObjects.Sprite
     coinAnim!: GameObjects.Sprite
     failCount!: 0
+    private headsButton!: Phaser.GameObjects.Sprite;
+    private tailsButton!: Phaser.GameObjects.Sprite;
+    private gambleResponseHandler: any;
     
     constructor(scene: Scene, data: any){
         super(scene, 0, 0);
@@ -24,10 +27,10 @@ export default class GamblePopup extends Phaser.GameObjects.Container{
         // Add content
         const title = scene.add.text(gameConfig.scale.width * 0.5, bg.y - bg.height / 2 + 50, 'Double Up', { fontFamily:"Deutsch", fontSize: '35px', color: '#ffffff', align:"center" } ).setOrigin(0.5);
         
-        const headsButton = this.scene.add.sprite(gameConfig.scale.width * 0.52, gameConfig.scale.height * 0.33, "previousButton").setInteractive().setScale(0.75)
-        const headText = this.scene.add.text(headsButton.x, headsButton.y, "Heads", {fontFamily: "Deutsch", fontSize: '30px', color: '#ffffff'}).setOrigin(0.5);
-        const tailButton = this.scene.add.sprite(gameConfig.scale.width * 0.7, gameConfig.scale.height * 0.33, "nextButton").setInteractive().setScale(0.75)
-        const tailText = this.scene.add.text(tailButton.x, tailButton.y, "Tails", {fontFamily: "Deutsch", fontSize: '30px', color: '#ffffff'}).setOrigin(0.5)
+        this.headsButton = this.scene.add.sprite(gameConfig.scale.width * 0.52, gameConfig.scale.height * 0.33, "previousButton").setInteractive().setScale(0.75)
+        const headText = this.scene.add.text(this.headsButton.x, this.headsButton.y, "Heads", {fontFamily: "Deutsch", fontSize: '30px', color: '#ffffff'}).setOrigin(0.5);
+        this.tailsButton = this.scene.add.sprite(gameConfig.scale.width * 0.7, gameConfig.scale.height * 0.33, "nextButton").setInteractive().setScale(0.75)
+        const tailText = this.scene.add.text(this.tailsButton.x, this.tailsButton.y, "Tails", {fontFamily: "Deutsch", fontSize: '30px', color: '#ffffff'}).setOrigin(0.5)
 
         const indsideRedBox = this.scene.add.sprite(gameConfig.scale.width * 0.62, gameConfig.scale.height * 0.6, "insideGamble").setOrigin(0.5).setScale(1.1)
 
@@ -51,30 +54,28 @@ export default class GamblePopup extends Phaser.GameObjects.Container{
 
         const coinOuterCircle = this.scene.add.sprite(gameConfig.scale.width * 0.3, gameConfig.scale.height * 0.5, "coinBg").setOrigin(0.5).setScale(1.1)
         this.coinAnim = this.scene.add.sprite(coinOuterCircle.x, coinOuterCircle.y, "coin0").setScale(0.9)
-
-       this.scene.anims.create({
-        key: 'coinAnimation',
-        frames:[
-            {key: "coin0"},
-            {key: "coin1"},
-            {key: "coin2"},
-            {key: "coin3"},
-            {key: "coin4"},
-            {key: "coin5"},
-            {key: "coin6"},
-            {key: "coin7"},
-            {key: "coin8"},
-            {key: "coin9"},
-            {key: "coin10"},
-            {key: "coin11"},
-            {key: "coin12"},
-            {key: "coin13"},
-            {key: "coin14"},
-            {key: "coin15"},
-        ],
-        frameRate: 24,
-        repeat: -1
-       })
+        // this.gambleResponseHandler = this.handleGambleResponse.bind(this);
+        this.setupCoinAnimation()
+        this.addEventListeners()
+        // if (!this.scene.anims.exists('coinAnimation')) {
+        //     const frames = [];
+        //     // Check if all textures exist before creating animation
+        //     for (let i = 0; i <= 15; i++) {
+        //         const textureKey = `coin${i}`;
+        //         if (this.scene.textures.exists(textureKey)) {
+        //             frames.push({ key: textureKey });
+        //         }
+        //     }
+        
+        //     if (frames.length > 0) {
+        //         this.scene.anims.create({
+        //             key: 'coinAnimation',
+        //             frames: frames,
+        //             frameRate: 24,
+        //             repeat: -1
+        //         });
+        //     }
+        // }
         // this.toggleAmount(this.fullAmount, this.halfAmount)
         gambleOuterCircle.on("pointerdown", ()=>{
             this.toggleAmount(this.fullAmount, this.halfAmount)
@@ -88,26 +89,97 @@ export default class GamblePopup extends Phaser.GameObjects.Container{
             gambleFiftyOuterCircle.disableInteractive()
         })
 
-        headsButton.on("pointerdown", ()=>{
-          gambleData.selected = "HEAD"
-          Globals.Socket.sendMessage("GAMBLERESULT", gambleData)
-          this.coinAnim.play("coinAnimation")
-        })
-
-        tailButton.on("pointerdown",()=>{
-            gambleData.selected = "TAIL"
-            Globals.Socket.sendMessage("GAMBLERESULT", gambleData)
-            this.coinAnim.play("coinAnimation")
-        })
+        // headsButton.on("pointerdown", () => {
+        //     if (this.coinAnim && this.scene.anims.exists('coinAnimation')) {
+        //         gambleData.selected = "HEAD";
+        //         Globals.Socket.sendMessage("GAMBLERESULT", gambleData);
+        //         this.playCoinAnimation();
+        //     }
+        // });
+        
+        // tailButton.on("pointerdown", () => {
+        //     if (this.coinAnim && this.scene.anims.exists('coinAnimation')) {
+        //         gambleData.selected = "TAIL";
+        //         Globals.Socket.sendMessage("GAMBLERESULT", gambleData);
+        //         this.playCoinAnimation();
+        //     }
+        // });
 
         collectButtonBg.on("pointerdown",()=>{
             this.failCount = 0
-            currentGameData.gambleOpen = false;
             this.scene.events.emit("gambleStateChanged", false);
             this.scene.events.emit("closePopup")
+            // this.destroy()
+            
         })
         this.scene.events.on("gambleSceneResult", this.handleGambleResponse, this)
-        this.add([bg, headingBg, title, headsButton, headText, tailButton, tailText, indsideRedBox, bankText,  betText, potentialWin, bankButtonBg,this.bankAmount, betButtonBg, this.betAmount, potentialButtonBg, this.winAmount, collectButtonBg, collecText, gambleAllText, gambleOuterCircle, gambleFiftyText, gambleFiftyOuterCircle,  this.fullAmountSprite, coinOuterCircle, this.coinAnim]);
+        this.add([bg, headingBg, title, this.headsButton, headText, this.tailsButton, tailText, indsideRedBox, bankText,  betText, potentialWin, bankButtonBg,this.bankAmount, betButtonBg, this.betAmount, potentialButtonBg, this.winAmount, collectButtonBg, collecText, gambleAllText, gambleOuterCircle, gambleFiftyText, gambleFiftyOuterCircle,  this.fullAmountSprite, coinOuterCircle, this.coinAnim]);
+    }
+
+    private addEventListeners() {
+        // Remove existing listeners first
+        this.removeEventListeners();
+    
+        // Add button listeners
+        this.headsButton.on('pointerdown', () => {
+            gambleData.selected = "HEAD";
+            Globals.Socket.sendMessage("GAMBLERESULT", gambleData);
+            if (this.coinAnim && this.coinAnim.scene) {
+                this.coinAnim.play("coinAnimation");
+            }
+        });
+    
+        this.tailsButton.on('pointerdown', () => {
+            gambleData.selected = "TAIL";
+            Globals.Socket.sendMessage("GAMBLERESULT", gambleData);
+            if (this.coinAnim && this.coinAnim.scene) {
+                this.coinAnim.play("coinAnimation");
+            }
+        });
+    
+        // Add scene event listener
+        // this.scene.events.on("gambleSceneResult", this.gambleResponseHandler);
+    }
+
+    private removeEventListeners() {
+        // Remove button listeners
+        if (this.headsButton && this.headsButton.scene) {
+            this.headsButton.removeAllListeners();
+        }
+        if (this.tailsButton && this.tailsButton.scene) {
+            this.tailsButton.removeAllListeners();
+        }
+    
+        // Remove scene event listener
+        this.scene.events.off("gambleSceneResult", this.gambleResponseHandler);
+    }
+
+    private setupCoinAnimation() {
+        // Remove existing animation if it exists
+        if (this.scene.anims.exists('coinAnimation')) {
+            this.scene.anims.remove('coinAnimation');
+        }
+    
+        // Create new animation
+        this.scene.anims.create({
+            key: 'coinAnimation',
+            frames: Array.from({ length: 16 }, (_, i) => ({ key: `coin${i}` })),
+            frameRate: 24,
+            repeat: -1
+        });
+    }
+
+    private playCoinAnimation() {
+        try {
+            if (this.coinAnim && this.coinAnim.scene) {
+                // Check if the texture exists before playing
+                if (this.scene.textures.exists(this.coinAnim.texture.key)) {
+                    this.coinAnim.play("coinAnimation");
+                }
+            }
+        } catch (error) {
+            console.error("Error playing coin animation:", error);
+        }
     }
 
     toggleAmount(fullAmount: boolean, halfAmount: boolean){
@@ -153,20 +225,25 @@ export default class GamblePopup extends Phaser.GameObjects.Container{
         if(!gambleResultData.gambleResponse.playerWon){
             this.failCount++
         }
+        console.log(this.failCount, "this.failCount");
+        
         setTimeout(() => {
-            this.coinAnim.stop()
-            if(gambleResultData.gambleResponse.coin === "TAIL"){
-                this.coinAnim.setTexture("coin0");
-            }else{
-                this.coinAnim.setTexture("coin8");
+            if (this.coinAnim && this.coinAnim.scene) {
+                this.coinAnim.stop();
+                const textureKey = gambleResultData.gambleResponse.coin === "TAIL" ? "coin0" : "coin8";
+                if (this.scene.textures.exists(textureKey)) {
+                    this.coinAnim.setTexture(textureKey);
+                }
             }
-            if(gambleResultData.gambleResponse.currentWinning === 0 || this.failCount > 3){
-                this.failCount = 0
-                currentGameData.gambleOpen = false;
+    
+            if (gambleResultData.gambleResponse.currentWinning === 0 || this.failCount > 3) {
+                this.failCount = 0;
                 this.scene.events.emit("gambleStateChanged", false);
-                this.scene.events.emit("closePopup")
+                // this.destroy();
+                this.scene.events.emit("closePopup");
             }
         }, 2000);
+
         this.bankAmount.updateLabelText((gambleResultData.gambleResponse.currentWinning).toFixed(3).toString())
         let newBet
         if(this.halfAmount){
@@ -177,5 +254,23 @@ export default class GamblePopup extends Phaser.GameObjects.Container{
             this.betAmount.updateLabelText(gambleResultData.gambleResponse.currentWinning.toFixed(3).toString())
             this.winAmount.updateLabelText((gambleResultData.gambleResponse.currentWinning * 2).toFixed(3).toString())
         }
+    }
+
+    destroy() {
+        // Clean up resources
+        this.removeEventListeners();
+        
+        // Stop any running animations
+        if (this.coinAnim && this.coinAnim.scene) {
+            this.coinAnim.stop();
+        }
+    
+        // Remove the animation
+        if (this.scene && this.scene.anims.exists('coinAnimation')) {
+            this.scene.anims.remove('coinAnimation');
+        }
+    
+        // Call parent's destroy method
+        super.destroy();
     }
 }

@@ -173,11 +173,12 @@ export default class MainScene extends Scene {
      * @param msgParams any
      * @description this method is used to update the value of textlabels like Balance, winAmount freeSpin which we are reciving after every spin
      */
-    recievedMessage(msgType: string, msgParams: any) {
+    recievedMessage(msgType: string, msgParams: any) {        
         if(msgType == "ResultData"){
             setTimeout(() => {
                 this.slots.stopTween();
             }, currentGameData.turboMode ? 500 : 1000);
+            
         }
         if(msgType == "gambleResponse"){
             this.events.emit("gambleSceneResult")
